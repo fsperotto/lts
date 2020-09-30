@@ -4,7 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="lts-pkg-fsperotto", # Replace with your own username
+    #name="lts-pkg-fsperotto",
+    name="lts",
     version="0.0.1",
     author="Filipo Studzinski Perotto",
     author_email="filipo.perotto.univ@gmail.com",
