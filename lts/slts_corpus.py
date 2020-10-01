@@ -33,8 +33,8 @@ class slts_corpus:
         if not recursive_search:
             break
 
-     #read files
-     for file in files:
+    #read files
+    for file in files:
         with open(file, "rt", encoding="UTF-8") as inputfile:
 
             if verbose:
