@@ -1,9 +1,3 @@
-
-import string   # text strings manipulation
-import os       # operating system and file operations
-import fnmatch  # string search 
-import re       # regular expressions
-
 class slts_corpus:
 
     def __init__(self, labels, name="corpus", url=None):  
@@ -24,6 +18,11 @@ class slts_corpus:
         return len(self.labels)-1
 
     def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, breakpoint_mark='***<-----------------SEGMENT_BREAKPOINT----------------->***', paragraph_mark='\n\n', sentence_mark='\n', verbose=True):
+
+        import os       # operating system and file operations
+        import string   # text strings manipulation
+        import fnmatch  # string search 
+        import re       # regular expressions
     
         if not append:
             #initialize list of text docs and list of segments inside them
