@@ -77,9 +77,9 @@ class slts_corpus:
                     doc = {'filename':filename, 'text':full_text, 'segments':segments, 'char_paragraph_breakpoints':char_paragraph_breakpoints, 'paragraph_segment_breakpoints':paragraph_seg_breakpoints, 'char_segment_breakpoints':char_seg_breakpoints}
 
                     #append to the list
-                    documents.append(doc)
+                    self.documents.append(doc)
                 
-        return documents
+        return self.documents
 
 
     def get_segment_from_text_given_breakpoints(self, document_idx, seg_idx):
