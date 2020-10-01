@@ -38,8 +38,8 @@ class slts_corpus:
             if not recursive_search:
                 break
 
-        if verbose:
-            print(inputfilenames)
+        #if verbose:
+        #    print(inputfilenames)
         
         #read files
         for inputfilename in inputfilenames:
@@ -65,6 +65,8 @@ class slts_corpus:
 
                 #list of starting positions (in char) for segments
                 char_seg_breakpoints = [len(seg)+len(paragraph_mark) for seg in segments[:-1]]
+                if len(char_seg_breakpoints) != self.num_breakpoints:
+                    print('warning: document ' + inputfilename + ' has different number of segments!')
 
                 #list of starting positions (in char) for paragraphs
                 char_paragraph_breakpoints = [m.start() for m in re.finditer(paragraph_mark, full_text)]
@@ -79,7 +81,7 @@ class slts_corpus:
                 #append to the list
                 self.documents.append(doc)
                 
-        return self.documents
+        return True
 
 
     def get_segment_from_text_given_breakpoints(self, document_idx, seg_idx):
