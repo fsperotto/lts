@@ -1,3 +1,8 @@
+import os       # operating system and file operations
+import string   # text strings manipulation
+import fnmatch  # string search 
+import re       # regular expressions
+
 class slts_corpus:
 
     def __init__(self, labels, name="corpus", url=None):  
@@ -19,64 +24,60 @@ class slts_corpus:
 
     def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, breakpoint_mark='***<-----------------SEGMENT_BREAKPOINT----------------->***', paragraph_mark='\n\n', sentence_mark='\n', verbose=True):
 
-        import os       # operating system and file operations
-        import string   # text strings manipulation
-        import fnmatch  # string search 
-        import re       # regular expressions
-    
         if not append:
             #initialize list of text docs and list of segments inside them
             self.documents = []
 
         #create a list of path+filenames to read
-        files = []
+        inputfilenames = []
         #for each subdirectory in the base directory
         for path, dirs, files in os.walk(os.path.abspath(base_folder)):
             #for each file corresponding to the filter
             for filename in fnmatch.filter(files, filefilter):
-                files.append(os.path.join(path, filename))
+                inputfilenames.append(os.path.join(base_folder, os.path.join(path, filename)))
             if not recursive_search:
                 break
 
+        if verbose:
+            print(inputfilenames)
+        
         #read files
-        for file in files:
-            with open(file, "rt", encoding="UTF-8") as inputfile:
+        for inputfilename in inputfilenames:
+            with open(inputfilename, "rt", encoding="UTF-8") as inputfile:
 
-                if verbose:
-                    print(file + " ", end='')        
+                #read raw data from file
+                full_text = inputfile.read()
 
-                    #read raw data from file
-                    full_text = inputfile.read()
-                    
-                    #get text segments
-                    segments = full_text.split(breakpoint_mark).strip('\s\n')
-                    for i, segtext in enumerate(segments):
-                        #replace tabs and strange line markers for a blank
-                        segtext = re.sub(r'[ \t\v\f\r]+', ' ', segtext)
-                        #replace multi new lines (>=2) for paragraph_mark
-                        segtext = re.sub(r'(\s*\n)+(\s*\n)+\s*', paragraph_mark, segtext)
-                        #trim single new lines
-                        segtext = re.sub(r'\s*\n\s*', '\n', segtext)
-                        #strip blanks and empty lines at the beginning and at the end
-                        segments[i] = segtext.strip('\s\n')
-                    
-                    #recreate full_text
-                    full_text = paragraph_mark.join(segments).strip('\s\n')
-                    
-                    #list of starting positions (in char) for segments
-                    char_seg_breakpoints = [len(seg)+len(paragraph_mark) for seg in segments[:-1]]
+                #get text segments
+                segments = full_text.split(breakpoint_mark)
+                for i, segtext in enumerate(segments):
+                    #replace tabs and strange line markers for a blank
+                    segtext = re.sub(r'[ \t\v\f\r]+', ' ', segtext)
+                    #replace multi new lines (>=2) for paragraph_mark
+                    segtext = re.sub(r'(\s*\n)+(\s*\n)+\s*', paragraph_mark, segtext)
+                    #trim single new lines
+                    segtext = re.sub(r'\s*\n\s*', '\n', segtext)
+                    #strip blanks and empty lines at the beginning and at the end
+                    segments[i] = segtext.strip('\s\n')
 
-                    #list of starting positions (in char) for paragraphs
-                    char_paragraph_breakpoints = [m.start() for m in re.finditer(paragraph_mark, full_text)]
+                #recreate full_text
+                full_text = paragraph_mark.join(segments).strip('\s\n')
 
-                    #list of starting positions (in paragraphs) for segments
-                    paragraph_seg_breakpoints = [char_paragraph_breakpoints.index(pos) for pos in char_seg_breakpoints]
-                    
-                    #create document dictionary
-                    doc = {'filename':filename, 'text':full_text, 'segments':segments, 'char_paragraph_breakpoints':char_paragraph_breakpoints, 'paragraph_segment_breakpoints':paragraph_seg_breakpoints, 'char_segment_breakpoints':char_seg_breakpoints}
+                #list of starting positions (in char) for segments
+                char_seg_breakpoints = [len(seg)+len(paragraph_mark) for seg in segments[:-1]]
 
-                    #append to the list
-                    self.documents.append(doc)
+                #list of starting positions (in char) for paragraphs
+                char_paragraph_breakpoints = [m.start() for m in re.finditer(paragraph_mark, full_text)]
+
+                #list of starting positions (in paragraphs) for segments
+                #paragraph_seg_breakpoints = [char_paragraph_breakpoints.index(pos) for pos in char_seg_breakpoints]
+                paragraph_seg_breakpoints = []
+
+                #create document dictionary
+                doc = {'filename':filename, 'text':full_text, 'segments':segments, 'char_paragraph_breakpoints':char_paragraph_breakpoints, 'paragraph_segment_breakpoints':paragraph_seg_breakpoints, 'char_segment_breakpoints':char_seg_breakpoints}
+
+                #append to the list
+                self.documents.append(doc)
                 
         return self.documents
 
