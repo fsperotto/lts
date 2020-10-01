@@ -23,7 +23,7 @@ class slts_corpus:
     def num_breakpoints(self):
         return len(self.labels)-1
 
-    def load_documents_from_txt(self, base_folder='./', file_filter='*.txt', append=False, recursive_search=False, breakpoint_mark='***<-----------------SEGMENT_BREAKPOINT----------------->***', paragraph_mark='\n\n', sentence_mark='\n', verbose=True):
+    def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, breakpoint_mark='***<-----------------SEGMENT_BREAKPOINT----------------->***', paragraph_mark='\n\n', sentence_mark='\n', verbose=True):
     
         if not append:
             #initialize list of text docs and list of segments inside them
