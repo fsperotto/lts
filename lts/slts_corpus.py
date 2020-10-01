@@ -76,14 +76,14 @@ class slts_corpus:
         return documents
 
 
-	def get_segment_from_text_given_breakpoints(self, document_idx, seg_idx):
-		num_breaks = self.num_breakpoints()
-		if seg_idx <= num_breaks:
-			ini = self.documents[document_idx]['paragraph_breakpoints'][self.documents[document_idx]['segment_breakpoints'][seg_idx-1]-1]    if  seg_idx >= 1           else  0
-			end = self.documents[document_idx]['paragraph_breakpoints'][self.documents[document_idx]['segment_breakpoints'][seg_idx]-1]      if  seg_idx < num_breaks   else  len(self.documents[document_idx]['text'])
-			return self.documents[document_idx]['text'][ini:end].strip('\n\s')
-		else:
-			return None
+    def get_segment_from_text_given_breakpoints(self, document_idx, seg_idx):
+        num_breaks = self.num_breakpoints()
+        if seg_idx <= num_breaks:
+            ini = self.documents[document_idx]['paragraph_breakpoints'][self.documents[document_idx]['segment_breakpoints'][seg_idx-1]-1]    if  seg_idx >= 1           else  0
+            end = self.documents[document_idx]['paragraph_breakpoints'][self.documents[document_idx]['segment_breakpoints'][seg_idx]-1]      if  seg_idx < num_breaks   else  len(self.documents[document_idx]['text'])
+            return self.documents[document_idx]['text'][ini:end].strip('\n\s')
+        else:
+            return None
             
     def get_paragraph_from_text_given_breakpoints(self, document_idx, par_idx):
         num_breaks = self.num_breakpoints()
