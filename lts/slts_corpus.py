@@ -101,7 +101,7 @@ class slts_corpus:
         self.paragraphs = []
         for j in tqdm(range(len(self.documents)), desc='documents', disable=tqdm_disable):
             lbl_idx=0
-            for i in range(self.num_segments)+1):
+            for i in range(self.num_segments):
                 txt = get_paragraph_from_text_given_breakpoints(self.documents[j], i)
                 self.documents[j]['paragraphs'].append({'text':txt})
                 if (i >= self.documents[j]['segment_breakpoints'][lbl_idx]):
