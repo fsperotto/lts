@@ -28,11 +28,11 @@ __version__ = (0, 0, 2)
 # "import lts" will import the following classes but also the corresponding modules (.py files)
 #
 names=[
-            {classname='EmbeddingsTextSegmenter', basemodulename='emb_text_seg', submodulename=''},
-            {classname='SegmentedCorpus',         basemodulename='slts_corpus',  submodulename=''},
-            {classname='TextPreProcessor',        basemodulename='pre_proc',     submodulename=''},
-            {classname='C99',                     basemodulename='uts',          submodulename='.c99'},
-            {classname='TextTiling',              basemodulename='uts',          submodulename='.texttiling'},
+            {'classname':'EmbeddingsTextSegmenter', 'basemodulename':'emb_text_seg', 'submodulename':''},
+            {'classname':'SegmentedCorpus',         'basemodulename':'slts_corpus',  'submodulename':''},
+            {'classname':'TextPreProcessor',        'basemodulename':'pre_proc',     'submodulename':''},
+            {'classname':'C99',                     'basemodulename':'uts',          'submodulename':'.c99'},
+            {'classname':'TextTiling',              'basemodulename':'uts',          'submodulename':'.texttiling'}
         ]
 for name in names:
     from "." + name.basemodulename + name.submodulename import name.classname
