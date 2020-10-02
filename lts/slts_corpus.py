@@ -22,7 +22,10 @@ class SegmentedCorpus:
     def num_breakpoints(self):
         return len(self.data['labels'])-1  if  self.data['labels']  else  0
 
-    def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, breakpoint_mark='***<-----------------SEGMENT_BREAKPOINT----------------->***', paragraph_mark='\n\n', sentence_mark='\n', verbose=True):
+    def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, breakpoint_mark='***<-----------------SEGMENT_BREAKPOINT----------------->***', verbose=True):
+
+        paragraph_mark='\n\n'
+        sentence_mark='\n'
 
         if (not append) or (not 'documents' in self.data.keys()) or (not isinstance(self.data['documents'], Iterable)):
             #initialize list of text docs and list of segments inside them
@@ -53,13 +56,16 @@ class SegmentedCorpus:
                 for i, segtext in enumerate(segments):
                     #replace tabs and strange line markers for a blank
                     segtext = re.sub(r'[ \t\v\f\r]+', ' ', segtext)
+                    #trim linebreaks
+                    segtext = re.sub(r'\n\s*\n', '\n\n', segtext)
                     #replace multi new lines (>=2) for paragraph_mark
-                    segtext = re.sub(r'(\s*\n)+(\s*\n)+\s*', paragraph_mark, segtext)
+                    segtext = re.sub(r'\n\n+', paragraph_mark, segtext)
                     #trim single new lines
                     segtext = re.sub(r'\s*\n\s*', '\n', segtext)
                     #strip blanks and empty lines at the beginning and at the end
-                    segments[i] = segtext.strip('\s\n')
-                    
+                    segtext = segtext.strip('\s\n')
+                    #replace
+                    segments[i] = segtext
 
                 #recreate full_text
                 full_text = paragraph_mark.join(segments).strip('\s\n')
