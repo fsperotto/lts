@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     #name="lts-pkg-fsperotto",
     name="lts",
-    version="0.0.1",
+    version="0.0.2",
     author="Filipo Studzinski Perotto",
     author_email="filipo.perotto.univ@gmail.com",
     description="A compilation of text tiling, text segmentation and text classification methods.",
@@ -15,7 +15,8 @@ setuptools.setup(
     url="https://github.com/fsperotto/lts",
     #packages=setuptools.find_packages(),
 	#packages=['lts', 'lts.emb_seg_text'],
-    packages=setuptools.find_packages(exclude=['data', 'notebooks']),
+    #packages=setuptools.find_packages(exclude=['data', 'notebooks']), 
+    packages=setuptools.find_namespace_packages(include=['lts','lts.*'],exclude=['data', 'notebooks']),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
