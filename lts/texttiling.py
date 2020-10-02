@@ -2,6 +2,18 @@
 # TEXT TILING
 ###############################################################################
 
+from tqdm.notebook import tqdm   # progress bar
+import string   # text strings manipulation
+import re       # regular expressions
+from collections import Counter
+from nltk import FreqDist
+from nltk import NaiveBayesClassifier as nbc
+from nltk.classify.util import accuracy
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import SnowballStemmer
+from nltk.tokenize.texttiling import TextTilingTokenizer, BLOCK_COMPARISON, VOCABULARY_INTRODUCTION, DEFAULT_SMOOTHING
+
 
 class TextTilingSegmenter(TextTilingTokenizer):
     
