@@ -115,7 +115,7 @@ class SegmentedCorpus:
         segments = []
         for j in tqdm(range(self.num_documents())):
             for i in range(self.num_segments()):
-                txt = get_segment_into_text_from_breakpoints(j, i)
+                txt = get_segment_from_text_given_breakpoints(j, i)
                 #seg_txt = self.data['documents'][j]['segments'][i]['text']
                 #if seg_txt != txt:
                 #    self.data['documents'][j]['segments'][i]['text'] = txt
@@ -129,7 +129,7 @@ class SegmentedCorpus:
         for j in tqdm(range(self.num_documents())):
             doc_segments = []
             for i in range(self.num_segments()):
-                txt = get_segment_into_text_from_breakpoints(j, i)
+                txt = get_segment_from_text_given_breakpoints(j, i)
                 doc_segments.append({'text':txt, 'segment_index':i, 'segment_label':self.data['labels'][i]})
             self.data['documents'][j]['segments'] = doc_segments
 
@@ -137,7 +137,7 @@ class SegmentedCorpus:
         for j in tqdm(range(self.num_documents())):
             doc_segments = []
             for i in range(self.num_segments()):
-                txt = get_segment_into_text_from_breakpoints(j, i)
+                txt = get_segment_from_text_given_breakpoints(j, i)
                 doc_segments.append({'text':txt, 'segment_index':i, 'segment_label':self.data['labels'][i]})
             self.data['documents'][j]['segments'] = doc_segments
             segments.append(doc_segments)
