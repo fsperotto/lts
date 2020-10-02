@@ -23,7 +23,7 @@ __path__ = __import__('pkgutil').extend_path(__path__, __name__)
 #
 __all__ = ["emb_text_seg", "uts", "pre_proc", "slts_corpus"]
 #
-__version__ = (0, 0, 2)
+#__version__ = (0, 0, 2)
 #
-from .uts.c99 import C99
-from .uts.texttiling import TextTiling
+#from .uts.c99 import C99
+#from .uts.texttiling import TextTiling
