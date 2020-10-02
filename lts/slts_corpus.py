@@ -4,6 +4,7 @@ import fnmatch  # string search
 import re       # regular expressions
 from deprecated import deprecated
 from collections.abc import Iterable
+from tqdm.notebook import tqdm   # progress bar
 
 class SegmentedCorpus:
 
