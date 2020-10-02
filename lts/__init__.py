@@ -1,3 +1,4 @@
+from importlib import import_module
 #
 # **pkgutil-style namespace packages**
 #
@@ -34,8 +35,10 @@ names=[
             {'classname':'C99',                     'basemodulename':'uts',          'submodulename':'.c99'},
             {'classname':'TextTiling',              'basemodulename':'uts',          'submodulename':'.texttiling'}
         ]
+#
 for name in names:
-    from "." + name.basemodulename + name.submodulename import name.classname
+    #from "." + name.basemodulename + name.submodulename import name.classname
+    import_module(name.classname, package="." + name.basemodulename + name.submodulename)
 #from .emb_text_seg import EmbeddingsTextSegmenter
 #from .slts_corpus import SegmentedCorpus
 #from .pre_proc import TextPreProcessor
