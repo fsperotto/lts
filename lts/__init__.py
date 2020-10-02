@@ -29,3 +29,6 @@ __version__ = (0, 0, 2)
 #
 from .emb_text_seg import EmbeddingsTextSegmenter
 from .slts_corpus import SegmentedCorpus
+from .pre_proc import sanitize, splitWords, splitParagraphs, splitSentences, vocabularize_all, vocabularize, tokenize, removeNoise, forceLowerCase, removeNonAlpha, stemWords, removeStopWords, removePonctuation, makeVocabulary, clean_text
+import uts
+import fad_loader
