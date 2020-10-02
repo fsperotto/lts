@@ -2,6 +2,8 @@ import os       # operating system and file operations
 import string   # text strings manipulation
 import fnmatch  # string search 
 import re       # regular expressions
+from deprecated import deprecated
+
 
 class slts_corpus:
 
