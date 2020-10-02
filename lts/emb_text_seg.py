@@ -12,7 +12,7 @@ from scipy import spatial
 import matplotlib.pyplot as plt
 
 
-class emb_text_seg:
+class EmbeddingsTextSegmenter:
 
     def __init__(self, file_name, glove_file):
 

@@ -5,7 +5,7 @@ import re       # regular expressions
 from deprecated import deprecated
 
 
-class slts_corpus:
+class SegmentedCorpus:
 
     def __init__(self, labels, name="corpus", url=None):  
         self.name=name

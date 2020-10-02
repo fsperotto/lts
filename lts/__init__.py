@@ -27,5 +27,5 @@
 #
 __version__ = (0, 0, 2)
 #
-from .emb_text_seg import *
-from .slts_corpus import *
+from .emb_text_seg import EmbeddingsTextSegmenter
+from .slts_corpus import SegmentedCorpus
