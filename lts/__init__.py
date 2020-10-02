@@ -38,7 +38,7 @@ names=[
 #
 for name in names:
     #from "." + name.basemodulename + name.submodulename import name.classname
-    import_module(name.classname, package="." + name.basemodulename + name.submodulename)
+    import_module(name['classname'], package="." + name['basemodulename'] + name['submodulename'])
 #from .emb_text_seg import EmbeddingsTextSegmenter
 #from .slts_corpus import SegmentedCorpus
 #from .pre_proc import TextPreProcessor
@@ -48,7 +48,7 @@ for name in names:
 # for import *:
 #
 #__all__ = ["uts", "texttiling", "emb_text_seg", "slts_corpus", "pre_proc", "SegmentedCorpus", "EmbeddingsTextSegmenter", "TextPreProcessor", "C99"]
-__all__ = list(set([name.basemodulename for name in names] + [name.classname for name in names]))
+__all__ = list(set([name['basemodulename'] for name in names] + [name['classname'] for name in names]))
 ["uts", "texttiling", "emb_text_seg", "slts_corpus", "pre_proc", "SegmentedCorpus", "EmbeddingsTextSegmenter", "TextPreProcessor", "C99"]
 
 #from .fad_loader import *
