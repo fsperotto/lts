@@ -19,8 +19,9 @@ setup(
     #packages=find_packages(),
 	#packages=['lts', 'lts.emb_seg_text'],
     #packages=find_packages(exclude=['data', 'notebooks']), 
-    packages=find_namespace_packages(include=['lts','lts.*'],exclude=['data', 'notebooks']),
-    include_package_data = True,
+    packages=find_namespace_packages(include=['lts','lts.uts'],exclude=['data', 'notebooks']),
+    #include_package_data = True,
+    #package_data={'corpus': ['corpus']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

@@ -16,12 +16,14 @@
 #
 #The __init__.py file for the namespace package needs to contain only the following:
 #
-__path__ = __import__('pkgutil').extend_path(__path__, __name__)
+#__path__ = __import__('pkgutil').extend_path(__path__, __name__)
+#__path__ = ['.', '.lts']
+
 #
 #
 # for import *:
 #
-__all__ = ["emb_text_seg", "pre_proc", "slts_corpus"]
+__all__ = ["uts", "emb_text_seg", "pre_proc", "slts_corpus"]
 #
 #__version__ = (0, 0, 2)
 #
