@@ -27,15 +27,26 @@ __version__ = (0, 0, 2)
 #
 # "import lts" will import the following classes but also the corresponding modules (.py files)
 #
-from .emb_text_seg import EmbeddingsTextSegmenter
-from .slts_corpus import SegmentedCorpus
-from .pre_proc import TextPreProcessor
-from .uts.c99 import C99
-from .uts.texttiling import TextTiling
+names=[
+            {classname='EmbeddingsTextSegmenter', basemodulename='emb_text_seg', submodulename=''},
+            {classname='SegmentedCorpus',         basemodulename='slts_corpus',  submodulename=''},
+            {classname='TextPreProcessor',        basemodulename='pre_proc',     submodulename=''},
+            {classname='C99',                     basemodulename='uts',          submodulename='.c99'},
+            {classname='TextTiling',              basemodulename='uts',          submodulename='.texttiling'},
+        ]
+for name in names:
+    from "." + name.basemodulename + name.submodulename import name.classname
+#from .emb_text_seg import EmbeddingsTextSegmenter
+#from .slts_corpus import SegmentedCorpus
+#from .pre_proc import TextPreProcessor
+#from .uts.c99 import C99
+#from .uts.texttiling import TextTiling
 #
 # for import *:
 #
-__all__ = ["uts", "uts.utils", "texttiling", "emb_text_seg", "slts_corpus", "pre_proc", "SegmentedCorpus", "EmbeddingsTextSegmenter", "TextPreProcessor", "C99"]
+#__all__ = ["uts", "texttiling", "emb_text_seg", "slts_corpus", "pre_proc", "SegmentedCorpus", "EmbeddingsTextSegmenter", "TextPreProcessor", "C99"]
+__all__ = list(set([name.basemodulename for name in names] + [name.classname for name in names]))
+["uts", "texttiling", "emb_text_seg", "slts_corpus", "pre_proc", "SegmentedCorpus", "EmbeddingsTextSegmenter", "TextPreProcessor", "C99"]
 
 #from .fad_loader import *
 #from .uts import *
