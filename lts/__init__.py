@@ -33,7 +33,7 @@ from .pre_proc import TextPreProcessor
 #
 # for import *:
 #
-__all__ = ["lts", "uts", "texttiling", "EmbeddingsTextSegmenter"]
+__all__ = ["uts", "texttiling", "emb_text_seg", "slts_corpus", "pre_proc", "SegmentedCorpus", "EmbeddingsTextSegmenter", "TextPreProcessor", "C99"]
 
 #from .fad_loader import *
 #from .uts import *
