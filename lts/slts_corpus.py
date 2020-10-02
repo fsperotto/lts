@@ -92,7 +92,7 @@ class SegmentedCorpus:
         doc = self.data['documents'][document_idx]
         if seg_idx <= num_breaks:
             ini = doc['paragraph_breakpoints'][doc['segment_breakpoints'][seg_idx-1]-1]    if  seg_idx >= 1           else  0
-            end = doc['paragraph_breakpoints'][doc['segment_breakpoints'][seg_idx]-1]      if  seg_idx < num_breaks   else  doc['len_text'])
+            end = doc['paragraph_breakpoints'][doc['segment_breakpoints'][seg_idx]-1]      if  seg_idx < num_breaks   else  doc['len_text']
             return doc['text'][ini:end].strip('\n\s')
         else:
             return None
@@ -102,7 +102,7 @@ class SegmentedCorpus:
         doc = self.data['documents'][document_idx]
         if par_idx <= num_breaks:
             ini = doc['paragraph_breakpoints'][par_idx-1]    if  par_idx >= 1           else  0
-            end = doc['paragraph_breakpoints'][par_idx]      if  par_idx < num_breaks   else  doc['len_text'])
+            end = doc['paragraph_breakpoints'][par_idx]      if  par_idx < num_breaks   else  doc['len_text']
             return doc['text'][ini:end].strip('\n\s')
         else:
             return None            
