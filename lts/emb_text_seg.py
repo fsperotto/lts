@@ -276,3 +276,6 @@ class emb_text_seg:
            res =  self.seg_text[i];
 
         return res
+
+def test_func():
+    return 'hello'

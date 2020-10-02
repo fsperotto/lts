@@ -27,5 +27,5 @@
 #
 __version__ = (0, 0, 2)
 #
-from .emb_text_seg import emb_text_seg
-from .slts_corpus import slts_corpus
+from .emb_text_seg import *
+from .slts_corpus import *
