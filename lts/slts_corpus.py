@@ -102,6 +102,19 @@ class slts_corpus:
         else:
             return None            
 
+
+    @deprecated
+    def verify_segment_text_correspondence(self, tqdm_disable=False, verbose=True):
+        print('Verifying segment text correspondence...')    #strip leading and trailing linebreaks and spaces
+        c = 0
+        for j in tqdm(range(len(data['documents']))):
+            for i in range(len(data['documents'][0]['segment_breakpoints'])+1):
+                txt = get_segment_into_text_from_breakpoints(data['documents'][j], i)
+                seg_txt = data['documents'][j]['segments'][i]['text']
+                if seg_txt != txt:
+                    data['documents'][j]['segments'][i]['text'] = txt
+                    c += 1
+        print('[done]', c, 'changed.')
             
     def create_corpus_paragraphs_list(self, tqdm_disable=False, verbose=True):
         if verbose:
