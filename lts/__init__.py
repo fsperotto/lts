@@ -40,5 +40,6 @@ for _name in _names:
 #
 # for import *:
 #
-__all__ = list(set([_name['basemodulename'] for _name in _names] + [_name['classname'] for _name in _names]))
+#__all__ = list(set([_name['basemodulename'] for _name in _names] + [_name['classname'] for _name in _names]))
+__all__ = list(set([_name['basemodulename'] for _name in _names] ))
 #["uts", "texttiling", "emb_text_seg", "slts_corpus", "pre_proc", "SegmentedCorpus", "EmbeddingsTextSegmenter", "TextPreProcessor", "C99"]
