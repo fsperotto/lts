@@ -35,7 +35,7 @@ from .uts.texttiling import TextTiling
 #
 # for import *:
 #
-__all__ = ["uts", "texttiling", "emb_text_seg", "slts_corpus", "pre_proc", "SegmentedCorpus", "EmbeddingsTextSegmenter", "TextPreProcessor", "C99"]
+__all__ = ["uts", "uts.utils", "texttiling", "emb_text_seg", "slts_corpus", "pre_proc", "SegmentedCorpus", "EmbeddingsTextSegmenter", "TextPreProcessor", "C99"]
 
 #from .fad_loader import *
 #from .uts import *
