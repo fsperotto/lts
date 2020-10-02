@@ -21,14 +21,17 @@
 
 #
 #
-# for import *:
-#
-__all__ = ["uts", "texttiling"]
 #
 __version__ = (0, 0, 2)
 #
 from .emb_text_seg import EmbeddingsTextSegmenter
 from .slts_corpus import SegmentedCorpus
-from .pre_proc import sanitize, splitWords, splitParagraphs, splitSentences, vocabularize_all, vocabularize, tokenize, removeNoise, forceLowerCase, removeNonAlpha, stemWords, removeStopWords, removePonctuation, makeVocabulary, clean_text
-from .fad_loader import *
+from .pre_proc import TextPreProcessor
+#from .uts import *
+#
+# for import *:
+#
+__all__ = ["uts", "texttiling", "EmbeddingsTextSegmenter"]
+
+#from .fad_loader import *
 #from .uts import *
