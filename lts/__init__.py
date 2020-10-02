@@ -23,9 +23,9 @@
 #
 # for import *:
 #
-__all__ = ["uts", "emb_text_seg", "pre_proc", "slts_corpus"]
+#__all__ = ["uts", "emb_text_seg", "pre_proc", "slts_corpus"]
 #
-#__version__ = (0, 0, 2)
+__version__ = (0, 0, 2)
 #
-#from .uts.c99 import C99
-#from .uts.texttiling import TextTiling
+from .emb_text_seg import emb_text_seg
+from .slts_corpus import slts_corpus
