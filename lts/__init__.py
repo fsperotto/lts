@@ -23,7 +23,7 @@
 #
 # for import *:
 #
-#__all__ = ["uts", "emb_text_seg", "pre_proc", "slts_corpus"]
+__all__ = ["uts", "texttiling"]
 #
 __version__ = (0, 0, 2)
 #
