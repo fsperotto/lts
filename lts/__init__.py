@@ -31,4 +31,4 @@ from .emb_text_seg import EmbeddingsTextSegmenter
 from .slts_corpus import SegmentedCorpus
 from .pre_proc import sanitize, splitWords, splitParagraphs, splitSentences, vocabularize_all, vocabularize, tokenize, removeNoise, forceLowerCase, removeNonAlpha, stemWords, removeStopWords, removePonctuation, makeVocabulary, clean_text
 from .fad_loader import *
-from .uts import *
+#from .uts import *
