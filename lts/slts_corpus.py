@@ -7,22 +7,38 @@ from collections.abc import Iterable
 from tqdm.notebook import tqdm   # progress bar
 
 class SegmentedCorpus:
-
-    def __init__(self, labels, name="corpus", url=None):  
+   
+    def __init__(self, labels=[['seg_a','seg_b'], None, None, None], name="corpus", url=None, hierarchy_names=['segment', 'paragraph', 'sentence', 'word'], break_char_marks=['\f', '\v', '\n', ' ']):  
         self.name=name
         self.url=url
-        self.data = {'labels':labels}
+        self.hierarchy_names = hierarchy_names
+        self.break_char_marks = break_char_marks
+        self.labels = labels
+        self.documents = []
     
-    def num_documents(self):
-        return len(self.data['documents']) if  self.data['documents']  else  0
-    
-    def num_segments(self):
-        return len(self.data['labels'])  if  self.data['labels']  else  0
-        
-    def num_breakpoints(self):
-        return len(self.data['labels'])-1  if  self.data['labels']  else  0
+    def num_levels(self):
+        return len(self.hierarchy_names)
 
-    def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, single_paragraph_mark=False, breakpoint_mark=u'***<-----------------SEGMENT_BREAKPOINT----------------->***', verbose=True):
+    def num_segments(self, level=0):
+        return len(self.labels[level])
+
+    def num_breakpoints(self, level=0):
+        return len(self.labels[level]-1)
+
+    def num_documents(self):
+        return len(self.documents)
+    
+
+    @staticmethod
+    def get_break_positions(text, breakpoint_regex_marks):
+        #recursively for each hierarchical segmentation level
+        for regex_mark in breakpoint_regex_marks:
+            #list of starting positions (in char)
+            pattern = re.compile(regex_mark, re.UNICODE)                
+            breakpoints = [match.end() for match in pattern.finditer(text)]
+    
+    
+    def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, breakpoint_regex_marks=[r'\s*\*\*\*<-----------------SEGMENT_BREAKPOINT----------------->\*\*\*\s*', r'\s*\n\s*'], verbose=True, encoding="UTF-8"):
 
         if (not append) or (not 'documents' in self.data.keys()) or (not isinstance(self.data['documents'], Iterable)):
             #initialize list of text docs and list of segments inside them
@@ -38,18 +54,49 @@ class SegmentedCorpus:
             if not recursive_search:
                 break
 
-        #if verbose:
-        #    print(inputfilenames)
-        
         #read files
         for inputfilename in inputfilenames:
-            with open(inputfilename, "rt", encoding="UTF-8") as inputfile:
+            with open(inputfilename, "rt", encoding=encoding) as inputfile:
+
+                if verbose:
+                    print('reading ' + inputfilename, end=' ')
 
                 #read raw data from file
                 full_text = inputfile.read()
 
+                #initial state of breakpoints, will be replaced hierarchically by lists of lists
+                ini = 0
+                #end = len(full_text)-1
+                pattern = re.compile(r'$', re.UNICODE)                
+                match = pattern.search(full_text[::-1])
+                end = match.start()-1  # same than match.end() because pattern is single character
+                absolute_segments = [[[ini, end]]]   #positions: start character of text, end character of text
+                absolute_breakpoints = [[[]]]
+                relative_segments = [[[ini, end]]]   #positions: start character of text, end character of text
+                relative_breakpoints = [[[]]]
+                
+                #for each hierarchical segmentation level
+                for level, regex_mark in enumerate(breakpoint_regex_marks):
+                    #append new level
+                    absolute_segments.append([])
+                    absolute_breakpoints.append([])
+                    relative_segments.append([])
+                    relative_breakpoints.append([])
+                    for i, seg in enumerate(absolute_segments):
+                        #list of starting positions (in char)
+                        ini, end = seg
+                        pattern = re.compile(regex_mark, re.UNICODE)
+                        rel_breaks = [ [match.start(), match.end()] for match in pattern.finditer(full_text[ini:end+1]) ]
+                        abs_breaks = [ [rel_ini+ini, rel_end+end] for rel_ini, rel_end in rel_breaks]
+                        relative_breakpoints[level+1].append([rel_breaks])
+                        absolute_breakpoints[level+1].append(seg_breakpoints)
+                    
+                    
+                    
+
                 #replace tabs and strange line markers for a blank
-                full_text = re.sub(u'[ \t\v\f\r]+', ' ', full_text)
+                #full_text = re.sub(u'[ \t\v\f\r]+', ' ', full_text)
+                full_text = re.sub(u'[ \t\v\f\r\b\a\e]+', ' ', full_text)
                 #trim lines
                 full_text = re.sub(u'\s*\n\s*', u'\n', full_text)
                 #replace multi linebreaks (>=2) for paragraph_mark '\n\n'
@@ -94,6 +141,9 @@ class SegmentedCorpus:
 
                 #append to the list
                 self.data['documents'].append(doc)
+
+                if verbose:
+                    print('[DONE]')
                 
         return True
 
@@ -169,3 +219,51 @@ class SegmentedCorpus:
                     lbl_idx = min(lbl_idx+1, len(self.documents[j]['segment_breakpoints'])-1)
                 self.paragraphs.append({'text':txt, 'lbl_idx':lbl_idx})
         print('[done]')            
+        
+        
+        
+#about space special characters
+#
+#charset = {'\\v (Vertical Tab)':'\v', 
+#           '\\t (Horizontal Tab)':'\t', 
+#           '\\r (Carriage Return)':'\r',
+#           '\\n (Line Feed)':'\n', 
+#           '\\f (form feed)':'\f',
+#           '\\b (Backspace)':'\b',
+#           '\\a (Bell Alert)':'\a',
+#           '\\e (Escape)':'\e'}
+#
+#for c in charset.keys():
+#    print(c + ' ASCII[' + str(ord(charset[c])) + "]:\n" + "hello" + charset[c] + "world")
+#    print('isspace() = ' + str(charset[c].isspace()))
+#    print()
+#
+#\v (Vertical Tab) ASCII[11]:
+#helloworld
+#isspace() = True
+#
+#\t (Horizontal Tab) ASCII[9]:
+#hello	world
+#isspace() = True
+#
+#\r (Carriage Return) ASCII[13]:
+#world
+#isspace() = True
+#
+#\n (Line Feed) ASCII[10]:
+#hello
+#world
+#isspace() = True
+#
+#\f (form feed) ASCII[12]:
+#helloworld
+#isspace() = True
+#
+#\b (Backspace) ASCII[8]:
+#hellworld
+#isspace() = False
+#
+#\a (Bell Alert) ASCII[7]:
+#helloworld
+#isspace() = False
+#
