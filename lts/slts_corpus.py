@@ -35,7 +35,7 @@ class SegmentedCorpus:
         for regex_mark in breakpoint_regex_marks:
             #list of starting positions (in char)
             pattern = re.compile(regex_mark, re.UNICODE)                
-            breakpoints = [match.end() for match in pattern.finditer(text)]
+            breakpoints = [match.end() for match in pattern.finditer(text)] 
     
     
     def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, breakpoint_regex_marks=[r'\s*\*\*\*<-----------------SEGMENT_BREAKPOINT----------------->\*\*\*\s*', r'\s*\n\s*'], verbose=True, encoding="UTF-8"):
