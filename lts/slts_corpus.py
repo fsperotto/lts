@@ -65,82 +65,79 @@ class SegmentedCorpus:
                 full_text = inputfile.read()
 
                 #initial state of breakpoints, will be replaced hierarchically by lists of lists
-                ini = 0
+                ini_doc = 0
                 #end = len(full_text)-1
                 pattern = re.compile(r'$', re.UNICODE)                
                 match = pattern.search(full_text[::-1])
-                end = match.start()-1  # same than match.end() because pattern is single character
-                absolute_segments = [[[ini, end]]]   #positions: start character of text, end character of text
-                absolute_breakpoints = [[[]]]
-                relative_segments = [[[ini, end]]]   #positions: start character of text, end character of text
-                relative_breakpoints = [[[]]]
+                end_doc = match.start()-1  # same than match.end() because pattern is single character
+                segments = [[[ini_doc, end_doc]]]   #positions: start character of text, end character of text
+                breakpoints = [[[]]]
                 
                 #for each hierarchical segmentation level
                 for level, regex_mark in enumerate(breakpoint_regex_marks):
                     #append new level
-                    absolute_segments.append([])
-                    absolute_breakpoints.append([])
-                    relative_segments.append([])
-                    relative_breakpoints.append([])
+                    segments.append([])
+                    breakpoints.append([])
                     for i, seg in enumerate(absolute_segments):
                         #list of starting positions (in char)
                         ini, end = seg
                         pattern = re.compile(regex_mark, re.UNICODE)
-                        rel_breaks = [ [match.start(), match.end()] for match in pattern.finditer(full_text[ini:end+1]) ]
-                        abs_breaks = [ [rel_ini+ini, rel_end+end] for rel_ini, rel_end in rel_breaks]
-                        relative_breakpoints[level+1].append([rel_breaks])
-                        absolute_breakpoints[level+1].append(seg_breakpoints)
+						breaks = [ [match.start()+ini, match.end()+end]  for match in pattern.finditer(full_text[ini:end+1] ]
+                        breakpoints[level+1].append([breaks])
+						subsegs = [ [ini, end] ] * (len(breaks)+1)
+						for j in range(len(breaks)):
+							subsegs[j][1]   = breaks[j][0]-1
+							subsegs[j+1][0] = breaks[j][1]+1
+                        segments[level+1].append([subsegs])
                     
-                    
-                    
-
-                #replace tabs and strange line markers for a blank
-                #full_text = re.sub(u'[ \t\v\f\r]+', ' ', full_text)
-                full_text = re.sub(u'[ \t\v\f\r\b\a\e]+', ' ', full_text)
-                #trim lines
-                full_text = re.sub(u'\s*\n\s*', u'\n', full_text)
-                #replace multi linebreaks (>=2) for paragraph_mark '\n\n'
-                full_text = re.sub(u'\n\n+', u'\n\n', full_text)
-                ##breakpoint mark for segment = \n\n\n
-                #full_text = re.sub(u'[\n\s]*'+breakpoint_mark+u'[\n\s]*', r'\t\t', full_text)
-                full_text = full_text.replace(breakpoint_mark, u'\t\t')
-                full_text = re.sub(u'\n*\t\t\n*', u'\t\t', full_text)
-                #strip blanks and empty lines at the beginning and at the end
-                full_text = full_text.strip(u'\s\n')
-                
-                if single_paragraph_mark:
-                    full_text = full_text.replace(u'\n', u'\n\n')
-
-                #list of starting positions (in char) for paragraphs
-                pattern = re.compile(u'\t\t', re.UNICODE)                
-                char_seg_breakpoints = [match.end() for match in pattern.finditer(full_text)]
-                if len(char_seg_breakpoints) != self.num_breakpoints():
-                    print('warning: document ' + inputfilename + ' has different number of segments!')
-                
-                ##get text segments
-                #segments = full_text.split(u'\t\t')
-                #
-                ##recreate full_text (segment break becomes paragraph break)
-                #full_text = u'\n\n'.join(segments)
-
-                full_text = full_text.replace(u'\t\t', u'\n\n')
-                
-                #list of starting positions (in char) for paragraphs
-                pattern = re.compile(u'\n\n', re.UNICODE)                
-                char_paragraph_breakpoints = [match.end() for match in pattern.finditer(full_text)]
-
-                #list of starting positions (in paragraphs) for segments
-                paragraph_seg_breakpoints = [char_paragraph_breakpoints.index(pos) for pos in char_seg_breakpoints]
-                #paragraph_seg_breakpoints = []
-                
-                #size of document in characters
-                len_text = len(full_text)
+#                #replace tabs and strange line markers for a blank
+#                #full_text = re.sub(u'[ \t\v\f\r]+', ' ', full_text)
+#                full_text = re.sub(u'[ \t\v\f\r\b\a\e]+', ' ', full_text)
+#                #trim lines
+#                full_text = re.sub(u'\s*\n\s*', u'\n', full_text)
+#                #replace multi linebreaks (>=2) for paragraph_mark '\n\n'
+#                full_text = re.sub(u'\n\n+', u'\n\n', full_text)
+#                ##breakpoint mark for segment = \n\n\n
+#                #full_text = re.sub(u'[\n\s]*'+breakpoint_mark+u'[\n\s]*', r'\t\t', full_text)
+#                full_text = full_text.replace(breakpoint_mark, u'\t\t')
+#                full_text = re.sub(u'\n*\t\t\n*', u'\t\t', full_text)
+#                #strip blanks and empty lines at the beginning and at the end
+#                full_text = full_text.strip(u'\s\n')
+#                
+#                if single_paragraph_mark:
+#                    full_text = full_text.replace(u'\n', u'\n\n')
+#
+#                #list of starting positions (in char) for paragraphs
+#                pattern = re.compile(u'\t\t', re.UNICODE)                
+#                char_seg_breakpoints = [match.end() for match in pattern.finditer(full_text)]
+#
+#                if len(char_seg_breakpoints) != self.num_breakpoints():
+#                    print('warning: document ' + inputfilename + ' has different number of segments!')
+#                
+#                ##get text segments
+#                #segments = full_text.split(u'\t\t')
+#                #
+#                ##recreate full_text (segment break becomes paragraph break)
+#                #full_text = u'\n\n'.join(segments)
+#
+#                full_text = full_text.replace(u'\t\t', u'\n\n')
+#                
+#                #list of starting positions (in char) for paragraphs
+#                pattern = re.compile(u'\n\n', re.UNICODE)                
+#                char_paragraph_breakpoints = [match.end() for match in pattern.finditer(full_text)]
+#
+#                #list of starting positions (in paragraphs) for segments
+#                paragraph_seg_breakpoints = [char_paragraph_breakpoints.index(pos) for pos in char_seg_breakpoints]
+#                #paragraph_seg_breakpoints = []
+#                
+#                #size of document in characters
+#                len_text = len(full_text)
                 
                 #create document dictionary
-                doc = {'filename':filename, 'text':full_text, 'len_text':len_text, 'char_paragraph_breakpoints':char_paragraph_breakpoints, 'paragraph_segment_breakpoints':paragraph_seg_breakpoints, 'char_segment_breakpoints':char_seg_breakpoints}
+                doc = {'filename':filename, 'text':full_text, 'len_text':end_doc+1, 'breakpoints':breakpoints, 'segments':segments}
 
                 #append to the list
-                self.data['documents'].append(doc)
+                self.documents.append(doc)
 
                 if verbose:
                     print('[DONE]')
