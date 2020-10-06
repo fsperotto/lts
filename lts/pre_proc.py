@@ -67,14 +67,14 @@ class TextPreProcessor:
         words = []
         for text in tqdm(texts):
             words.extend(splitWords(text))
-        vocabulary = tokenize(words)
+        vocabulary = TextPreProcessor.tokenize(words)
         return vocabulary
 
     @staticmethod
     def vocabularize(text):
-        text = sanitize(text)
-        text_words = splitWords(text)
-        text_vocabulary = tokenize(text_words)
+        text = TextPreProcessor.sanitize(text)
+        text_words = TextPreProcessor.splitWords(text)
+        text_vocabulary = TextPreProcessor.tokenize(text_words)
         return text_vocabulary
 
     #########################################
@@ -82,15 +82,15 @@ class TextPreProcessor:
     @staticmethod
     def tokenize(words, language=LANG, bremoveNonAlpha=True, bforceLowerCase=True, bremoveNoise=True, bstemWords=True, bmakeVocabulary=False):
         if bremoveNonAlpha:
-            tokens = removeNonAlpha(words)
+            tokens = TextPreProcessor.removeNonAlpha(words)
         if bforceLowerCase:
-            tokens = forceLowerCase(tokens)
+            tokens = TextPreProcessor.forceLowerCase(tokens)
         if bremoveNoise:
-            tokens = removeNoise(tokens, language)
+            tokens = TextPreProcessor.removeNoise(tokens, language)
         if bstemWords:
-            tokens = stemWords(tokens, language)
+            tokens = TextPreProcessor.stemWords(tokens, language)
         if bmakeVocabulary:
-            tokens = makeVocabulary(tokens)
+            tokens = TextPreProcessor.makeVocabulary(tokens)
         return tokens
         
     #---------------------------------------
