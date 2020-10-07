@@ -21,7 +21,14 @@ class SegmentedCorpus:
         
     def num_breakpoints(self):
         return len(self.data['labels'])-1  if  self.data['labels']  else  0
+		
+	def num_paragraphs(self, idx_doc=None):
+		if idx_doc is None:
+			return len(self.data['paragraphs'])
+		else:
+			return len(self.data['documents'][idx_doc]['char_paragraph_breakpoints'])+1
 
+			
     def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, single_paragraph_mark=False, breakpoint_mark=u'***<-----------------SEGMENT_BREAKPOINT----------------->***', verbose=True):
 
         if (not append) or (not 'documents' in self.data.keys()) or (not isinstance(self.data['documents'], Iterable)):
@@ -108,7 +115,7 @@ class SegmentedCorpus:
         else:
             return None
             
-    def get_paragraph_from_text_given_breakpoints(self, document_idx, par_idx):
+    def get_paragraph_from_text(self, document_idx, par_idx):
         num_breaks = self.num_breakpoints()
         doc = self.data['documents'][document_idx]
         if par_idx <= num_breaks:
@@ -146,31 +153,47 @@ class SegmentedCorpus:
             segments.append(doc_segments)
         self.data['segments'] = segments
             
-    def create_corpus_paragraphs_list(self, tqdm_disable=False, verbose=True):
+    def create_paragraphs_list_into_corpus(self, tqdm_disable=False, verbose=True):
         if verbose:
             print('Creating list of paragraphs inside corpus...')
         self.data['paragraphs'] = []
         for j, doc in enumerate(tqdm(self.data['documents'], desc='documents', disable=tqdm_disable)):
-            for i in range(self.num_segments()):
-                txt = self.get_paragraph_from_text_given_breakpoints(doc, i)
+            for i in range(self.num_paragraphs(j)):
+                txt = self.get_paragraph_from_text(j, i)
                 self.data['paragraphs'].append({'text':txt})
         if verbose:
             print('[done]')            
         
-    def create_documents_paragraphs_list(self):
+    def create_paragraphs_list_into_documents(self):
         print('Creating list of paragraphs inside each document...')
-        for j in tqdm(range(len(self.documents)), desc='documents', disable=tqdm_disable):
-            self.documents[j]['paragraphs'] = []
+        for j in tqdm(range(self.num_documents()), desc='documents', disable=tqdm_disable):
+            self.data['documents'][j]['paragraphs'] = []
             lbl_idx=0
-            for i in range(len(self.documents[j]['paragraph_breakpoints'])+1):
-                txt = self.get_paragraph_from_text_given_breakpoints(self.documents[j], i)
+            for i in range(self.num_paragraphs(j)):
+                txt = self.get_paragraph_from_text(j, i)
                 self.documents[j]['paragraphs'].append({'text':txt})
-                if (i >= self.documents[j]['segment_breakpoints'][lbl_idx]):
-                    lbl_idx = min(lbl_idx+1, len(self.documents[j]['segment_breakpoints'])-1)
-                self.paragraphs.append({'text':txt, 'lbl_idx':lbl_idx})
+#                if (i >= self.documents[j]['segment_breakpoints'][lbl_idx]):
+#                    lbl_idx = min(lbl_idx+1, len(self.documents[j]['segment_breakpoints'])-1)
+#                self.paragraphs.append({'text':txt, 'lbl_idx':lbl_idx})
         print('[done]')                 
         
-        
+	def create_text_files_from_corpus(self, folder='./', segmark = "***<-----------------SEGMENT_BREAKPOINT----------------->***"):
+		
+		#!mkdir '/kaggle/working/segmark'
+		
+		with open(folder + 'segmark.txt', "wt", encoding="UTF-8") as outputfile:
+		    outputfile.write(segmark)
+		        
+		for doc in self.data['documents']:
+		    
+		    full_text = ('\n'+segmark+'\n').join([seg['text'] for seg in doc['segments']])
+		    
+		    with open(folder + doc['filename'], "wt", encoding="UTF-8") as outputfile:
+		        outputfile.write(full_text)
+		        
+		import shutil
+		shutil.make_archive('corpus', 'zip', folder)
+
         
 #about space special characters
 #
