@@ -1,81 +1,3 @@
-# lts
-Linear Text Segmentation Methods (Structured Document Tiling)
-
-This project is a compilation of several other projects :
-
----
-
-## Semantic Text Segmentation with Embeddings
-
-  https://github.com/ReemHal/Semantic-Text-Segmentation-with-Embeddings/
-
-Given a text document *d* and a desired number of segments *k*, 
-this repo shows how to segment the document into *k* semantically homoginuous segments. 
-
-The general approach is as follows:
-1. Convert the words in *d* into embedding vectors using the GloVe model.
-2. For all word sequences *s* in *d*: the average meaning (centroid) of *s* is represented by taking the average embeddings of all words in *s*.
-3. The error in the centroid calculation for a sequence *s* is calculated as the average cosine distance between the centroid and all words in *s*.
-4. The segmentation is done using the greedy heuristic by iteratively choosing the best split point *p*.
-
-
-The class text_segmentation_class in __[text_segmetnation.py](https://github.com/ReemHal/Semantic-Text-Segmentation-with-Embeddings/blob/master/text_segmentation.py)__ contains funtions to convert the document
-words in GloVe embeddings and choose the splitting points. The notebook __[semantc_text_segmentation_example.ipynb](https://github.com/ReemHal/Semantic-Text-Segmentation-with-Embeddings/blob/master/semantc_text_segmentation_example.ipynb)__
-demonstrates how to use the class.
-
-<a name="tech"><a/>
-### Technologies
-
-This project was developed using:
-
-  - python=3.5
-  - gensim==3.7.1
-  - matplotlib==2.2.3
-  - mpld3==0.3
-  - nltk==3.4
-  - numpy==1.14.5
-  - pandas==0.23.4
-  - parso==0.3.1
-  - Pillow==5.2.0
-  - scikit-learn==0.19.2
-  - scipy==1.1.0
-
----
-
-## Unsupervised Text Segmentation
-
-https://github.com/intfloat/uts
-
-
-### Install
-
-For ```python 2.x```:
-
-    sudo pip install uts
-
-For ```python 3.x```:
-
-    sudo pip3 install uts
-
-### Usage
-
-```python
-import uts
-
-document = ['this is a good day', 'good day means good weather',\
-            'I love computer science', 'computer science is cool']
-model = uts.C99(window=2)
-boundary = model.segment(document)
-# output: [1, 0, 1, 0]
-print(boundary)
-```
-
-
-## Neural and Non-Neural Text Segmentation
-
-  https://github.com/shayneobrien/text-segmentation
-
-  
 Introduction
 ============
 
@@ -95,7 +17,7 @@ Problem Description
 
 In probabilistic language modeling, we compute the probability of a
 sequence based on a training corpus. More formally, let $w$ $\in$ $V$ be
-a token in the corpus with vocabulary $V$, let $w_1$, $w_2$, Ö, $w_{n}$
+a token in the corpus with vocabulary $V$, let $w_1$, $w_2$, ‚Ä¶, $w_{n}$
 be an input sequence of token-length $n$, and let $w_i$ be the $i$th
 token of that sequence. Our objective is to maximize the probability
 given by
@@ -127,7 +49,7 @@ that is frequently used in deep learning.
 
 We construct all models using PyTorch in Python 3. For all neural
 network architectures, we used a learning rate of 1e-3, a weight decay
-of 1e-5, a batch size of 32 tokens, Stanfordís pre-trained word GloVe
+of 1e-5, a batch size of 32 tokens, Stanford‚Äôs pre-trained word GloVe
 embeddings (Pennington et al., 2014), the Adam optimizer, and the negative log
 likelihood loss function. Early stopping, defined here to be the point
 at which the validation perplexity stopped decreasing, was used on all
@@ -144,7 +66,7 @@ $$P(w_t) = \alpha_1P(w_t|w_{t-2}, w_{t-1}) + \alpha_2P(w_t|w_{t-1}) + \alpha_3P(
 Such that $\sum_i \alpha_i = 1$. We use the expectation maximization
 (EM) algorithm to find values for $\alpha$ that minimize the perplexity
 on a development set. Ideally, we would work with all three splits of
-the PTB ñ a training set that is used to count maximum-likelihood
+the PTB ‚Äì a training set that is used to count maximum-likelihood
 estimates for ngram probabilities; a development set that is used to
 learn optimal values for $\alpha$; and a test set used for evaluation.
 Since in this case we just have the PTB training and validation sets, we
@@ -203,7 +125,7 @@ $$h_{t}^{l} = f(T_{n,n}h_{t-1}^{l} + T_{n,n}h_{t}^{l-1})$$
 where $f$ is a nonlinear activation function such as tanh or sigmoid.
 
 In LSTMs, we afford the network a vector $c_{t}^l$ $\in$ $\mathbb{R}^n$
-called a $\textit{memory cell}$ that stores the ìlong-termî memory of
+called a $\textit{memory cell}$ that stores the ‚Äúlong-term‚Äù memory of
 the network. The LSTM decides to overwrite, retrieve, or keep the memory
 cell at each time step $t$ for the next time step $t$+1. Following
 Graves et al. (2013), the LSTM deterministic state transition equation
@@ -246,7 +168,7 @@ before early stopping.
 
 As an extension of the LSTM baseline, we combined three 1-layer LSTMs of
 different unit sizes to make a pseudo-3-layer LSTM and provided
-connections to the lower-order layers in each layerís time step
+connections to the lower-order layers in each layer‚Äôs time step
 representations. The flow of this model was as follows:
 
 1.  First, each batch was passed through a 1-layer, 1000-unit LSTM. This
@@ -257,7 +179,7 @@ representations. The flow of this model was as follows:
     by (Zaremba et al., 2015). Dropout was applied after each LSTM layer.
 
 2.  Instead of only using the final representations from the 200-unit
-    LSTM, though ñ the outputs from the three LSTMs were concatenated
+    LSTM, though ‚Äì the outputs from the three LSTMs were concatenated
     together to form a single tensor of size 32x10x1700. This provided
     direct connections for the first two LSTMs in the final encodings,
     which then were mapped by a linear layer to the softmax output for a
@@ -284,7 +206,7 @@ experimented with the following modifications:
     useful domain specificity for PTB as these embeddings were trained
     on news articles.
 
-3.  Implemented ìmulti-channelî embeddings as described by (Kim, 2014) in
+3.  Implemented ‚Äúmulti-channel‚Äù embeddings as described by (Kim, 2014) in
     the context of CNN architectures. Instead of just using a single
     embeddings layer that is updated during training, the pre-trained
     weights matrix is copied into two separate embedding layers: one
@@ -297,34 +219,34 @@ experimented with the following modifications:
 
 4.  Experimented with different approaches to batching. Instead of
     modeling the corpus as a single, unbroken sequence during training
-    (such as with torchtextís `BPTTIterator`), we tried splitting the
+    (such as with torchtext‚Äôs `BPTTIterator`), we tried splitting the
     corpus into individual sentences and then producing separate
     training cases for each token in each sentence. For example, for the
-    sentence ìI like black catsî we produced five contexts:
+    sentence ‚ÄúI like black cats‚Äù we produced five contexts:
 
-    1.  ì<EOS> Iî
+    1.  ‚Äú<EOS> I‚Äù
 
-    2.  ì<EOS> I likeî
+    2.  ‚Äú<EOS> I like‚Äù
 
-    3.  ì<EOS> I like blackî
+    3.  ‚Äú<EOS> I like black‚Äù
 
-    4.  ì<EOS> I like black catsî
+    4.  ‚Äú<EOS> I like black cats‚Äù
 
-    5.  ì<EOS> I like black cats <EOS>î
+    5.  ‚Äú<EOS> I like black cats <EOS>‚Äù
 
     And the model is trained to predict the last token in each context
-    at time step $t$ from the first $t-1$ tokens. We used PyTorchís
+    at time step $t$ from the first $t-1$ tokens. We used PyTorch‚Äôs
     `pack_padded_sequence` function to handle variable-length inputs to the
     LSTM. Practically, this was appealing because it makes it easier to
-    engineer a wider range of features from the context before a word ñ
+    engineer a wider range of features from the context before a word ‚Äì
     for example, it becomes easy to implement bidirectional LSTMs with
     both a forward and backward pass over the $t-1$ context, which, to
     our knowledge, would be difficult or impossible under the original
     training regime enforced by `BPTTIterator`. We realized after trying
     this, though, that it will never be competitive with
-    `BPTTIterator`ís continuous representation of the corpus because the
-    sentences in the corpus are grouped by article ñ and thus also at a
-    thematic / conceptual level ñ which means that the model can learn
+    `BPTTIterator`‚Äôs continuous representation of the corpus because the
+    sentences in the corpus are grouped by article ‚Äì and thus also at a
+    thematic / conceptual level ‚Äì which means that the model can learn
     useful information across the sentence boundaries about what type of
     word should come next.[^1]
 
@@ -354,7 +276,7 @@ mention training for as many as 55 epochs.)
 Conclusion
 ==========
 
-We trained four classes of models ñ a traditional trigram model with
+We trained four classes of models ‚Äì a traditional trigram model with
 linear interpolation, with weights learned by expectation maximization;
 a simple neural network language model following (Bengio et al., 2003); a
 single-layer LSTM baseline; and an extension to this model that uses
@@ -366,21 +288,21 @@ by (Zaremba et al., 2015) using roughly equivalent hyperparameters.
 References
 ==========
 
-Y. Bengio, R. Ducharme, P. Vincent, C. Jauvin. ìA Neural Probabilistic
-Language Model.î Journal of Machine Learning Research 3, pages
-1137ñ1155. 2003.
+Y. Bengio, R. Ducharme, P. Vincent, C. Jauvin. ‚ÄúA Neural Probabilistic
+Language Model.‚Äù Journal of Machine Learning Research 3, pages
+1137‚Äì1155. 2003.
 
-D. Jurafsky. ìLanguage Modeling: Introduction to N-grams.î Lecture.
+D. Jurafsky. ‚ÄúLanguage Modeling: Introduction to N-grams.‚Äù Lecture.
 Stanford University CS124. 2012.
 
-Y. Kim. ìConvolutional Neural Networks for Sentence Classification.î
+Y. Kim. ‚ÄúConvolutional Neural Networks for Sentence Classification.‚Äù
 Proceedings of the 2014 Conference on Empirical Methods in Natural
-Language Processing (EMNLP), pages 1746ñ1751. 2014.
+Language Processing (EMNLP), pages 1746‚Äì1751. 2014.
 
-T. Mikolov, K. Chen, G. Corrado, J. Dean. ìEfficient estimation of word
-representations in vector space.î arXiv preprint arXiv:1301.3781. 2013.
+T. Mikolov, K. Chen, G. Corrado, J. Dean. ‚ÄúEfficient estimation of word
+representations in vector space.‚Äù arXiv preprint arXiv:1301.3781. 2013.
 
-J. Pennington, R. Socher, C. Manning. ìGloVe: Global Vectors for Word Representation.î Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP), pages 1532-1543. 2014.
+J. Pennington, R. Socher, C. Manning. ‚ÄúGloVe: Global Vectors for Word Representation.‚Äù Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP), pages 1532-1543. 2014.
 
-W. Zaremba, I. Sutskever, O. Vinyals. 2015. ìRecurrent Neural Network
-Regularization.î arXiv preprint arXiv:1409.2329. 2015.
+W. Zaremba, I. Sutskever, O. Vinyals. 2015. ‚ÄúRecurrent Neural Network
+Regularization.‚Äù arXiv preprint arXiv:1409.2329. 2015.
