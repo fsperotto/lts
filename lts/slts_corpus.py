@@ -163,7 +163,7 @@ class SegmentedCorpus:
         if verbose:
             print('[done]')            
         
-    def create_paragraphs_list_into_documents(self):
+    def create_paragraphs_list_into_documents(self, tqdm_disable=False, verbose=True):
         print('Creating list of paragraphs inside each document...')
         for j in tqdm(range(self.num_documents()), desc='documents', disable=tqdm_disable):
             self.data['documents'][j]['paragraphs'] = []
