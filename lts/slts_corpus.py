@@ -170,7 +170,7 @@ class SegmentedCorpus:
             lbl_idx=0
             for i in range(self.num_paragraphs(j)):
                 txt = self.get_paragraph_from_text(j, i)
-                self.documents[j]['paragraphs'].append({'text':txt})
+                self.data['documents'][j]['paragraphs'].append({'text':txt})
 #                if (i >= self.documents[j]['segment_breakpoints'][lbl_idx]):
 #                    lbl_idx = min(lbl_idx+1, len(self.documents[j]['segment_breakpoints'])-1)
 #                self.paragraphs.append({'text':txt, 'lbl_idx':lbl_idx})
