@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages, find_namespace_packages
 
-with open("README.md", "r") as fh:
+with open("README.md", "rb") as fh:
     long_description = fh.read()
 
 requirements = ['numpy>=1.10.4']
