@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages, find_namespace_packages
 
-with open("README.md", "rb") as fh:
-    long_description = fh.read()
+#with open("README.md", "r") as fh:
+#    long_description = fh.read()
 
 requirements = ['numpy>=1.10.4']
 
@@ -12,8 +12,8 @@ setup(
     author="Filipo Studzinski Perotto",
     author_email="filipo.perotto.univ@gmail.com",
     description="A compilation of text tiling, text segmentation and text classification methods.",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
+    #long_description=long_description,
+    #long_description_content_type="text/markdown",
     url="https://github.com/fsperotto/lts",
     license = 'MIT',
     #packages=find_packages(),
