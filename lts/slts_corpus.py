@@ -21,14 +21,13 @@ class SegmentedCorpus:
         
     def num_breakpoints(self):
         return len(self.data['labels'])-1  if  self.data['labels']  else  0
-		
-	def num_paragraphs(self, idx_doc=None):
-		if idx_doc is None:
-			return len(self.data['paragraphs'])
-		else:
-			return len(self.data['documents'][idx_doc]['char_paragraph_breakpoints'])+1
 
-			
+    def num_paragraphs(self, idx_doc=None):
+        if idx_doc is None:
+            return len(self.data['paragraphs'])
+        else:
+            return len(self.data['documents'][idx_doc]['char_paragraph_breakpoints'])+1
+
     def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, single_paragraph_mark=False, breakpoint_mark=u'***<-----------------SEGMENT_BREAKPOINT----------------->***', verbose=True):
 
         if (not append) or (not 'documents' in self.data.keys()) or (not isinstance(self.data['documents'], Iterable)):
@@ -177,22 +176,15 @@ class SegmentedCorpus:
 #                self.paragraphs.append({'text':txt, 'lbl_idx':lbl_idx})
         print('[done]')                 
         
-	def create_text_files_from_corpus(self, folder='./', segmark = "***<-----------------SEGMENT_BREAKPOINT----------------->***"):
-		
-		#!mkdir '/kaggle/working/segmark'
-		
-		with open(folder + 'segmark.txt', "wt", encoding="UTF-8") as outputfile:
-		    outputfile.write(segmark)
-		        
-		for doc in self.data['documents']:
-		    
-		    full_text = ('\n'+segmark+'\n').join([seg['text'] for seg in doc['segments']])
-		    
-		    with open(folder + doc['filename'], "wt", encoding="UTF-8") as outputfile:
-		        outputfile.write(full_text)
-		        
-		import shutil
-		shutil.make_archive('corpus', 'zip', folder)
+    def create_text_files_from_corpus(self, folder='./', segmark = "***<-----------------SEGMENT_BREAKPOINT----------------->***"):
+        with open(folder + 'segmark.txt', "wt", encoding="UTF-8") as outputfile:
+            outputfile.write(segmark)
+        for doc in self.data['documents']:
+            full_text = ('\n'+segmark+'\n').join([seg['text'] for seg in doc['segments']])
+            with open(folder + doc['filename'], "wt", encoding="UTF-8") as outputfile:
+                outputfile.write(full_text)
+        import shutil
+        shutil.make_archive('corpus', 'zip', folder)
 
         
 #about space special characters
