@@ -134,7 +134,6 @@ class SegmentedCorpus:
     def get_paragraph_label_idx(self, document_idx, par_idx):
         num_paragraphs = self.num_paragraphs(idx_doc=document_idx)
         doc = self.data['documents'][document_idx]
-        paragraph_seg_breakpoints = [char_paragraph_breakpoints.index(pos) for pos in char_seg_breakpoints]
         if par_idx < num_paragraphs:
             return next(s for s, p in enumerate(doc['paragraph_segment_breakpoints'] + [doc['len_text']]) if par_idx < p) 
         else:
