@@ -5,8 +5,8 @@ import re       # regular expressions
 import shutil   # zip
 from deprecated import deprecated
 from collections.abc import Iterable
-#from tqdm.notebook import tqdm   # progress bar
-from tqdm import tqdm   # progress bar
+from tqdm.notebook import tqdm   # progress bar
+#from tqdm import tqdm   # progress bar
 
 DEFAULT_BREAKMARK = u'***<-----------------SEGMENT_BREAKPOINT----------------->***'
 
@@ -159,8 +159,9 @@ class SegmentedCorpus:
             self.data['documents'][j]['segments'] = []
             for i in range(self.num_segments()):
                 txt = self.get_segment_from_text_given_breakpoints(j, i)
-                self.data['documents'][j]['segments'].append({'text':txt, 'segment_index':i, 'segment_label':self.data['labels'][i]})
-            self.data['segments'].append(self.data['documents'][j]['segments'])
+                seg = {'text':txt, 'segment_index':i, 'segment_label':self.data['labels'][i]}
+                self.data['documents'][j]['segments'].append(seg)
+                self.data['segments'].append(seg)
             
     def create_paragraphs_list_into_corpus(self, tqdm_disable=False, verbose=True):
         if verbose:
@@ -195,8 +196,9 @@ class SegmentedCorpus:
             for i in range(self.num_paragraphs(j)):
                 txt = self.get_paragraph_from_text(j, i)
                 idx = self.get_paragraph_label_idx(j, i)
-                self.data['documents'][j]['paragraphs'].append({'text':txt, 'segment_index':idx})
-            self.data['paragraphs'].append(self.data['documents'][j]['paragraphs'])
+                par = {'text':txt, 'segment_index':idx}
+                self.data['documents'][j]['paragraphs'].append(par)
+                self.data['paragraphs'].append(par)
         if verbose:
             print('[done]')        
         
