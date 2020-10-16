@@ -171,18 +171,13 @@ class SegmentedCorpus:
             for i in range(self.num_paragraphs(j)):
                 txt = self.get_paragraph_from_text(j, i)
                 idx = self.get_paragraph_label_idx(j, i)
-<<<<<<< HEAD
                 self.data['paragraphs'].append({'text':txt, 'segment_index':idx})
-=======
-                self.data['paragraphs'].append({'text':txt, 'lbl_idx':idx})
->>>>>>> 3b953f383a382a38544694f3306f0357e55637a1
         if verbose:
-            print('[done]')            
+            print('[done]')             
         
     def create_paragraphs_list_into_documents(self, tqdm_disable=False, verbose=True):
         if verbose:
             print('Creating list of paragraphs inside each document...')
-<<<<<<< HEAD
         for j in tqdm(range(self.num_documents()), desc='documents', disable=tqdm_disable):
             self.data['documents'][j]['paragraphs'] = []
             for i in range(self.num_paragraphs(j)):
@@ -196,38 +191,15 @@ class SegmentedCorpus:
         if verbose:
             print('Creating lists of paragraphs...')
         self.data['paragraphs'] = []
-=======
->>>>>>> 3b953f383a382a38544694f3306f0357e55637a1
         for j in tqdm(range(self.num_documents()), desc='documents', disable=tqdm_disable):
             self.data['documents'][j]['paragraphs'] = []
             for i in range(self.num_paragraphs(j)):
                 txt = self.get_paragraph_from_text(j, i)
                 idx = self.get_paragraph_label_idx(j, i)
-<<<<<<< HEAD
                 self.data['documents'][j]['paragraphs'].append({'text':txt, 'segment_index':idx})
             self.data['paragraphs'].append(self.data['documents'][j]['paragraphs'])
         if verbose:
             print('[done]')        
-=======
-                self.data['documents'][j]['paragraphs'].append({'text':txt, 'lbl_idx':idx})
-        if verbose:
-            print('[done]')                 
-
-    def create_paragraphs_list(self, tqdm_disable=False, verbose=True):
-        if verbose:
-            print('Creating lists of paragraphs...')
-        self.data['paragraphs'] = []
-        for j in tqdm(range(self.num_documents()), desc='documents', disable=tqdm_disable):
-            self.data['documents'][j]['paragraphs'] = []
-            lbl_idx=0
-            for i in range(self.num_paragraphs(j)):
-                txt = self.get_paragraph_from_text(j, i)
-                idx = self.get_paragraph_label_idx(j, i)
-                self.data['paragraphs'].append({'text':txt, 'lbl_idx':idx})
-                self.data['documents'][j]['paragraphs'].append({'text':txt, 'lbl_idx':idx})
-        if verbose:
-            print('[done]')                 
->>>>>>> 3b953f383a382a38544694f3306f0357e55637a1
         
     def create_text_files_from_corpus(self, folder='./', segmark = "***<-----------------SEGMENT_BREAKPOINT----------------->***"):
         with open(folder + 'segmark.txt', "wt", encoding="UTF-8") as outputfile:
