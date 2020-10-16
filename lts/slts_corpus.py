@@ -199,7 +199,7 @@ class SegmentedCorpus:
                 self.data['documents'][j]['paragraphs'].append({'text':txt, 'segment_index':idx})
             self.data['paragraphs'].append(self.data['documents'][j]['paragraphs'])
         if verbose:
-            print('[done]')                 
+            print('[done]')        
         
     def create_text_files_from_corpus(self, folder='./', segmark = "***<-----------------SEGMENT_BREAKPOINT----------------->***"):
         with open(folder + 'segmark.txt', "wt", encoding="UTF-8") as outputfile:
