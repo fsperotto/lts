@@ -2,9 +2,13 @@ import os       # operating system and file operations
 import string   # text strings manipulation
 import fnmatch  # string search 
 import re       # regular expressions
+import shutil   # zip
 from deprecated import deprecated
 from collections.abc import Iterable
-from tqdm.notebook import tqdm   # progress bar
+#from tqdm.notebook import tqdm   # progress bar
+from tqdm import tqdm   # progress bar
+
+DEFAULT_BREAKMARK = u'***<-----------------SEGMENT_BREAKPOINT----------------->***'
 
 class SegmentedCorpus:
 
@@ -28,7 +32,7 @@ class SegmentedCorpus:
         else:
             return len(self.data['documents'][idx_doc]['char_paragraph_breakpoints'])+1
 
-    def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, single_paragraph_mark=False, breakpoint_mark=u'***<-----------------SEGMENT_BREAKPOINT----------------->***', verbose=True):
+    def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, single_paragraph_mark=False, breakpoint_mark=DEFAULT_BREAKMARK, verbose=True):
 
         if (not append) or (not 'documents' in self.data.keys()) or (not isinstance(self.data['documents'], Iterable)):
             #initialize list of text docs and list of segments inside them
@@ -88,12 +92,15 @@ class SegmentedCorpus:
                 pattern = re.compile(u'\n\n', re.UNICODE)                
                 char_paragraph_breakpoints = [match.end() for match in pattern.finditer(full_text)]
 
-                #list of starting positions (in paragraphs) for segments
+                #list of starting positions (in paragraphs) for segments (from the second one)
                 paragraph_seg_breakpoints = [char_paragraph_breakpoints.index(pos) for pos in char_seg_breakpoints]
                 #paragraph_seg_breakpoints = []
                 
                 #size of document in characters
-                len_text = len(full_text)
+                #len_text = len(full_text)
+                pattern = re.compile("(?s:.*)$", re.UNICODE)                
+                len_text = pattern.search(full_text).end()
+                
                 
                 #create document dictionary
                 doc = {'filename':filename, 'text':full_text, 'len_text':len_text, 'char_paragraph_breakpoints':char_paragraph_breakpoints, 'paragraph_segment_breakpoints':paragraph_seg_breakpoints, 'char_segment_breakpoints':char_seg_breakpoints}
@@ -115,15 +122,23 @@ class SegmentedCorpus:
             return None
             
     def get_paragraph_from_text(self, document_idx, par_idx):
-        num_breaks = self.num_breakpoints()
+        num_paragraphs = self.num_paragraphs(idx_doc=document_idx)
         doc = self.data['documents'][document_idx]
-        if par_idx <= num_breaks:
-            ini = doc['char_paragraph_breakpoints'][par_idx-1]    if  par_idx >= 1           else  0
-            end = doc['char_paragraph_breakpoints'][par_idx]      if  par_idx < num_breaks   else  doc['len_text']
+        if par_idx < num_paragraphs:
+            ini = doc['char_paragraph_breakpoints'][par_idx-1]    if  par_idx >= 1                 else  0
+            end = doc['char_paragraph_breakpoints'][par_idx]      if  par_idx < num_paragraphs-1   else  doc['len_text']
             return doc['text'][ini:end].strip('\n\s')
         else:
             return None            
 
+    def get_paragraph_label_idx(self, document_idx, par_idx):
+        num_paragraphs = self.num_paragraphs(idx_doc=document_idx)
+        doc = self.data['documents'][document_idx]
+        paragraph_seg_breakpoints = [char_paragraph_breakpoints.index(pos) for pos in char_seg_breakpoints]
+        if par_idx < num_paragraphs:
+            return next(s for s, p in enumerate(doc['paragraph_segment_breakpoints'] + [doc['len_text']]) if par_idx < p) 
+        else:
+            return None            
 
     def create_segments_list_into_corpus(self, tqdm_disable=False, verbose=True):
         segments = []
@@ -159,22 +174,38 @@ class SegmentedCorpus:
         for j, doc in enumerate(tqdm(self.data['documents'], desc='documents', disable=tqdm_disable)):
             for i in range(self.num_paragraphs(j)):
                 txt = self.get_paragraph_from_text(j, i)
-                self.data['paragraphs'].append({'text':txt})
+                idx = self.get_paragraph_label_idx(j, i)
+                self.data['paragraphs'].append({'text':txt, 'lbl_idx':idx})
         if verbose:
             print('[done]')            
         
     def create_paragraphs_list_into_documents(self, tqdm_disable=False, verbose=True):
-        print('Creating list of paragraphs inside each document...')
+        if verbose:
+            print('Creating list of paragraphs inside each document...')
         for j in tqdm(range(self.num_documents()), desc='documents', disable=tqdm_disable):
             self.data['documents'][j]['paragraphs'] = []
             lbl_idx=0
             for i in range(self.num_paragraphs(j)):
                 txt = self.get_paragraph_from_text(j, i)
-                self.data['documents'][j]['paragraphs'].append({'text':txt})
-#                if (i >= self.documents[j]['segment_breakpoints'][lbl_idx]):
-#                    lbl_idx = min(lbl_idx+1, len(self.documents[j]['segment_breakpoints'])-1)
-#                self.paragraphs.append({'text':txt, 'lbl_idx':lbl_idx})
-        print('[done]')                 
+                idx = self.get_paragraph_label_idx(j, i)
+                self.data['documents'][j]['paragraphs'].append({'text':txt, 'lbl_idx':idx})
+        if verbose:
+            print('[done]')                 
+
+    def create_paragraphs_list(self, tqdm_disable=False, verbose=True):
+        if verbose:
+            print('Creating lists of paragraphs...')
+        self.data['paragraphs'] = []
+        for j in tqdm(range(self.num_documents()), desc='documents', disable=tqdm_disable):
+            self.data['documents'][j]['paragraphs'] = []
+            lbl_idx=0
+            for i in range(self.num_paragraphs(j)):
+                txt = self.get_paragraph_from_text(j, i)
+                idx = self.get_paragraph_label_idx(j, i)
+                self.data['paragraphs'].append({'text':txt, 'lbl_idx':idx})
+                self.data['documents'][j]['paragraphs'].append({'text':txt, 'lbl_idx':idx})
+        if verbose:
+            print('[done]')                 
         
     def create_text_files_from_corpus(self, folder='./', segmark = "***<-----------------SEGMENT_BREAKPOINT----------------->***"):
         with open(folder + 'segmark.txt', "wt", encoding="UTF-8") as outputfile:
@@ -183,7 +214,6 @@ class SegmentedCorpus:
             full_text = ('\n'+segmark+'\n').join([seg['text'] for seg in doc['segments']])
             with open(folder + doc['filename'], "wt", encoding="UTF-8") as outputfile:
                 outputfile.write(full_text)
-        import shutil
         shutil.make_archive('corpus', 'zip', folder)
 
         
