@@ -169,9 +169,10 @@ class SegmentedCorpus:
         if verbose: 
             print('Creating list of segments...')
         segments = []
+        num_labels = self.num_labels()
         for j, doc in enumerate(tqdm(self.data['documents'], desc='documents', disable=tqdm_disable)):
             doc_segments = []
-            for i in range(self.num_labels()):
+            for i in range(num_labels):
                 txt = self.get_segment_from_text(j, i)
                 seg = {'text':txt, 'label_index':i, 'document_index':j}
                 doc_segments.append(seg)   
@@ -190,13 +191,14 @@ class SegmentedCorpus:
         if verbose: 
             print('Creating list of paragraphs...')
         paragraphs = []
+        num_breaks = self.num_breakpoints()
         for j, doc in enumerate(tqdm(self.data['documents'], desc='documents', disable=tqdm_disable)):
             doc_paragraphs = []
             lbl_idx = 0
             for i in range(self.num_paragraphs(j)):
                 txt = self.get_paragraph_from_text(j, i)
                 #lbl_idx = self.get_paragraph_label_idx(j, i)
-                if i == doc['paragraph_segment_breakpoints'][lbl_idx]:
+                if (i < num_breaks) and (i == doc['paragraph_segment_breakpoints'][lbl_idx]):
                     lbl_idx += 1
                 par = {'text':txt, 'label_index':lbl_idx, 'document_idx':j, 'paragraph_idx':i}
                 doc_paragraphs.append(par)
