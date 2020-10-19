@@ -6,10 +6,20 @@ import shutil   # zip
 from deprecated import deprecated
 from collections.abc import Iterable
 from tqdm.notebook import tqdm   # progress bar
+from nltk import FreqDist
 #from tqdm import tqdm   # progress bar
 
 DEFAULT_BREAKMARK = u'***<-----------------SEGMENT_BREAKPOINT----------------->***'
 
+def _preprocessor_function(self, text): 
+    if text is None: text = ""
+    return TextPreProcessor.removeNoise(text.lower())
+            
+def _tokenizer_function(self, text): 
+    if text is None: text = ""
+    return TextPreProcessor.tokenize(text.split())
+
+    
 class SegmentedCorpus:
 
     def __init__(self, labels, name="corpus", url=None):  
@@ -20,7 +30,7 @@ class SegmentedCorpus:
     def num_documents(self):
         return len(self.data['documents']) if  self.data['documents']  else  0
     
-    def num_segments(self):
+    def num_labels(self):
         return len(self.data['labels'])  if  self.data['labels']  else  0
         
     def num_breakpoints(self):
@@ -32,6 +42,7 @@ class SegmentedCorpus:
         else:
             return len(self.data['documents'][idx_doc]['char_paragraph_breakpoints'])+1
 
+            
     def load_documents_from_txt(self, base_folder='./', filefilter='*.txt', append=False, recursive_search=False, single_paragraph_mark=False, breakpoint_mark=DEFAULT_BREAKMARK, verbose=True):
 
         if (not append) or (not 'documents' in self.data.keys()) or (not isinstance(self.data['documents'], Iterable)):
@@ -111,7 +122,7 @@ class SegmentedCorpus:
         return True
 
 
-    def get_segment_from_text_given_breakpoints(self, document_idx, seg_idx):
+    def get_segment_from_text(self, document_idx, seg_idx):
         num_breaks = self.num_breakpoints()
         doc = self.data['documents'][document_idx]
         if seg_idx <= num_breaks:
@@ -120,6 +131,12 @@ class SegmentedCorpus:
             return doc['text'][ini:end].strip('\n\s')
         else:
             return None
+
+    def get_segment_text_from_document(self, document_idx, seg_idx):
+        if 'segments' in self.data['documents']:
+            return self.data['documents'][document_idx]['segments'][seg_idx]['text']
+        else:
+            return self.get_segment_from_text(document_idx, seg_idx)
             
     def get_paragraph_from_text(self, document_idx, par_idx):
         num_paragraphs = self.num_paragraphs(idx_doc=document_idx)
@@ -131,6 +148,12 @@ class SegmentedCorpus:
         else:
             return None            
 
+    def get_paragraph_text_from_document(self, document_idx, par_idx):
+        if 'paragraphs' in self.data['documents']:
+            return self.data['documents'][document_idx]['paragraphs'][par_idx]['text']
+        else:
+            return self.get_paragraph_from_text(document_idx, seg_idx)
+            
     def get_paragraph_label_idx(self, document_idx, par_idx):
         num_paragraphs = self.num_paragraphs(idx_doc=document_idx)
         doc = self.data['documents'][document_idx]
@@ -138,71 +161,56 @@ class SegmentedCorpus:
             return next(s for s, p in enumerate(doc['paragraph_segment_breakpoints'] + [doc['len_text']]) if par_idx < p) 
         else:
             return None            
-
-    def create_segments_list_into_corpus(self, tqdm_disable=False, verbose=True):
-        self.data['segments'] = []
-        for j in tqdm(range(self.num_documents())):
-            for i in range(self.num_segments()):
-                txt = self.get_segment_from_text_given_breakpoints(j, i)
-                self.data['segments'].append({'text':txt, 'segment_index':i, 'segment_label':self.data['labels'][i]})
-
-    def create_segments_list_into_documents(self, tqdm_disable=False, verbose=True):
-        for j in tqdm(range(self.num_documents())):
-            self.data['documents'][j]['segments'] = []
-            for i in range(self.num_segments()):
-                txt = self.get_segment_from_text_given_breakpoints(j, i)
-                self.data['documents'][j]['segments'].append({'text':txt, 'segment_index':i, 'segment_label':self.data['labels'][i]})
-
-    def create_segments_list(self, tqdm_disable=False, verbose=True):
-        self.data['segments'] = []
-        for j in tqdm(range(self.num_documents())):
-            self.data['documents'][j]['segments'] = []
-            for i in range(self.num_segments()):
-                txt = self.get_segment_from_text_given_breakpoints(j, i)
-                seg = {'text':txt, 'segment_index':i, 'segment_label':self.data['labels'][i]}
-                self.data['documents'][j]['segments'].append(seg)
-                self.data['segments'].append(seg)
+    
+    def get_segment_label(self, label_idx):
+        return self.data['labels'][label_idx]         
             
-    def create_paragraphs_list_into_corpus(self, tqdm_disable=False, verbose=True):
-        if verbose:
-            print('Creating list of paragraphs inside corpus...')
-        self.data['paragraphs'] = []
+    def create_segments_list(self, tqdm_disable=False, verbose=True, into_corpus=True, into_docs=True):
+        if verbose: 
+            print('Creating list of segments...')
+        segments = []
         for j, doc in enumerate(tqdm(self.data['documents'], desc='documents', disable=tqdm_disable)):
-            for i in range(self.num_paragraphs(j)):
-                txt = self.get_paragraph_from_text(j, i)
-                idx = self.get_paragraph_label_idx(j, i)
-                self.data['paragraphs'].append({'text':txt, 'segment_index':idx})
-        if verbose:
-            print('[done]')             
-        
-    def create_paragraphs_list_into_documents(self, tqdm_disable=False, verbose=True):
-        if verbose:
-            print('Creating list of paragraphs inside each document...')
-        for j in tqdm(range(self.num_documents()), desc='documents', disable=tqdm_disable):
-            self.data['documents'][j]['paragraphs'] = []
-            for i in range(self.num_paragraphs(j)):
-                txt = self.get_paragraph_from_text(j, i)
-                idx = self.get_paragraph_label_idx(j, i)
-                self.data['documents'][j]['paragraphs'].append({'text':txt, 'segment_index':idx})
-        if verbose:
-            print('[done]')                 
-
-    def create_paragraphs_list(self, tqdm_disable=False, verbose=True):
-        if verbose:
-            print('Creating lists of paragraphs...')
-        self.data['paragraphs'] = []
-        for j in tqdm(range(self.num_documents()), desc='documents', disable=tqdm_disable):
-            self.data['documents'][j]['paragraphs'] = []
-            for i in range(self.num_paragraphs(j)):
-                txt = self.get_paragraph_from_text(j, i)
-                idx = self.get_paragraph_label_idx(j, i)
-                par = {'text':txt, 'segment_index':idx}
-                self.data['documents'][j]['paragraphs'].append(par)
-                self.data['paragraphs'].append(par)
-        if verbose:
+            doc_segments = []
+            for i in range(self.num_labels()):
+                txt = self.get_segment_from_text(j, i)
+                seg = {'text':txt, 'label_index':i, 'document_index':j}
+                doc_segments.append(seg)   
+            segments.extend(doc_segments)  #note that the object seg is the same into both lists
+            if into_docs: 
+                doc['segments'] = doc_segments
+        if into_corpus:
+            self.data['segments'] = segments
+        if verbose: 
             print('[done]')        
+        return segments
+    # see: itertools.chain(*iterables) ?
         
-    def create_text_files_from_corpus(self, folder='./', segmark = "***<-----------------SEGMENT_BREAKPOINT----------------->***"):
+            
+    def create_paragraphs_list(self, tqdm_disable=False, verbose=True, into_corpus=True, into_docs=True):
+        if verbose: 
+            print('Creating list of paragraphs...')
+        paragraphs = []
+        for j, doc in enumerate(tqdm(self.data['documents'], desc='documents', disable=tqdm_disable)):
+            doc_paragraphs = []
+            lbl_idx = 0
+            for i in range(self.num_paragraphs(j)):
+                txt = self.get_paragraph_from_text(j, i)
+                #lbl_idx = self.get_paragraph_label_idx(j, i)
+                if i == doc['paragraph_segment_breakpoints'][lbl_idx]:
+                    lbl_idx += 1
+                par = {'text':txt, 'label_index':lbl_idx, 'document_idx':j, 'paragraph_idx':i}
+                doc_paragraphs.append(par)
+            paragraphs.extend(doc_paragraphs)  #note that the object par is the same into both lists
+            if into_docs: 
+                doc['paragraphs'] = doc_paragraphs
+        if into_corpus: 
+            self.data['paragraphs'] = paragraphs
+        if verbose: 
+            print('[done]')        
+        return paragraphs
+        
+        
+    def create_text_files_from_corpus(self, folder='./', segmark=DEFAULT_BREAKMARK):
         with open(folder + 'segmark.txt', "wt", encoding="UTF-8") as outputfile:
             outputfile.write(segmark)
         for doc in self.data['documents']:
@@ -211,7 +219,90 @@ class SegmentedCorpus:
                 outputfile.write(full_text)
         shutil.make_archive('corpus', 'zip', folder)
 
+    #print('\n\n*************************************************\n')
+    #print("Getting vocabulary... ")       
+    #
+    #voc_pickel_file = "voc.pickle"
+    #!rm {voc_pickel_file}
+    #
+    ##if a pickle file exists, read it
+    #if os.path.isfile(WORKING_FOLDER + voc_pickel_file):
+    #    print(" |-Reading pickle file... ", end='')        
+    #    with open(WORKING_FOLDER + voc_pickel_file, 'rb') as fp:
+    #        data['vocabulary'] = pickle.load(fp)
+    #    print("[DONE]")      
+    #
+    #else:
+    #    print(" |-Pre-processing texts and creating vocabulary... ", end='')        
+    #    data['vocabulary'] = vocabularize_all([doc['text'] for doc in data['documents']])
+    #    print("[DONE]")
+    #    print(" |-Saving pickle file... ", end='')
+    #    with open(WORKING_FOLDER + voc_pickel_file, 'wb') as fp:
+    #        pickle.dump(data['vocabulary'], fp, protocol=pickle.HIGHEST_PROTOCOL)            
+    #    print("[DONE]")
         
+    def create_vocabulary(self, preprocessor_function=_preprocessor_function, tokenizer_function=_tokenizer_function, 
+                          into_docs=True, into_segs=True, 
+                          tqdm_disable=False, verbose=True):
+        if verbose: 
+            print("Making full vocabulary... ", end='')
+        self.data['vocabulary_list'] = []  #list of retained words, tokenized, but still in order and with repetitions
+        #for each paragraph within the corpus
+        for par in enumerate(tqdm(self.data['paragraphs'], desc='paragraphs', disable=tqdm_disable)):
+            #get clean text of paragraph
+            if preprocessor_function is not None:
+                text = preprocessor_function(par['text'])
+            else:
+                text = par['text']
+            #get list of tokens (vocabulary on paragraph)
+            if preprocessor_function is not None:
+                par['vocabulary_list'] = tokenizer_function(text)
+            else:
+                par['vocabulary_list'] = text.split()
+            #insert into corpus
+            self.data['vocabulary_list'].extend(par['vocabulary_list'])
+        #document vocabulary
+        if into_docs: 
+            for doc in tqdm(self.data['documents'], desc='documents', disable=tqdm_disable):
+                doc['vocabulary_list'] = []
+                for par in doc['paragraphs']:
+                    doc['vocabulary_list'].extend(par['vocabulary_list'])
+        #segment vocabulary
+        if into_segs: 
+            for seg in tqdm(self.data['segments'], desc='segments', disable=tqdm_disable):
+                seg['vocabulary_list'] = []
+                for par in seg['paragraphs']:
+                    seg['vocabulary_list'].extend(par['vocabulary_list'])
+        #done
+        if verbose: 
+            print("[DONE] (" + str(len(self.data['vocabulary_list'])) + ' tokenized words.)')
+        return self.data['vocabulary_list']
+            
+            
+    def create_vocabulary_frequency(self, tqdm_disable=False, verbose=True, preserve_only=None):
+        if verbose: 
+            print("Calculating vocabulary frequency... ", end='')    
+        self.data['vocabulary_freq'] = FreqDist([voc for voc in self.data['vocabulary']])
+        if preserve_only is not None:
+            self.data['voc_freq'] = corpus.data['voc_freq'].most_common(preserve_only)
+            self.data['vocabulary'] = self.data['voc_freq'].keys()
+        if verbose: print("[DONE]")
+            
+    def create_vocabulary_frequency_on_segments(self, tqdm_disable=False, verbose=True, preserve_only=None):
+        if verbose: print(" |-Making segment vocabulary... ", end='')
+        for i, seg in enumerate(tqdm(self.data['segments'])):
+            self.data['segments'][i]['voc_freq'] = FreqDist([voc for voc in self.data['vocabulary']])
+            text = seg['text']
+            if text is not None:
+                text = text.lower()
+            else:
+                text = ""
+            all_words = TextPreProcessor.removeNoise(text.split())
+            tokenized_words = TextPreProcessor.tokenize(all_words)
+            self.data['segments'][i]['voc_freq'] = FreqDist([voc for voc in tokenized_words])
+            self.data['segments'][i]['vocabulary'] = self.data['segments'][i]['voc_freq'].keys()
+        if verbose: print("[DONE]")      
+            
 #about space special characters
 #
 #charset = {'\\v (Vertical Tab)':'\v', 
