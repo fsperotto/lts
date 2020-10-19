@@ -7,17 +7,40 @@ from deprecated import deprecated
 from collections.abc import Iterable
 from tqdm.notebook import tqdm   # progress bar
 from nltk import FreqDist
+from nltk.tokenize import word_tokenize
 #from tqdm import tqdm   # progress bar
+from nltk.corpus import stopwords
+from nltk.stem import SnowballStemmer
 
 DEFAULT_BREAKMARK = u'***<-----------------SEGMENT_BREAKPOINT----------------->***'
 
 def _preprocessor_function(text): 
     if text is None: text = ""
-    return TextPreProcessor.removeNoise(text.lower())
-            
+    REPLACE_BY_SPACE_RE = re.compile('[/(){}\[\]\|@,;]')
+    BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
+    ONLY_WORDS_RE = re.compile(r"\w+")
+    STOPWORDS = set(stopwords.words('french'))
+    # lowercase text
+    text = text.lower()
+    # replace REPLACE_BY_SPACE_RE symbols by space in text. substitute the matched string in REPLACE_BY_SPACE_RE with space.
+    text = REPLACE_BY_SPACE_RE.sub(' ', text) 
+    # remove symbols which are in BAD_SYMBOLS_RE from text. substitute the matched string in BAD_SYMBOLS_RE with nothing. 
+    text = BAD_SYMBOLS_RE.sub('', text) 
+    #text = re.sub(r'\W+', '', text)
+    text = text.replace('\d+', '')
+    #remove stopwords
+    text = ' '.join(word for word in text.split() if word not in STOPWORDS) # remove stopwors from text
+    return text            
+        
 def _tokenizer_function(text): 
     if text is None: text = ""
-    return TextPreProcessor.tokenize(text.split())
+    ## using spaces    
+    #return  text.split()
+    ## using regex   
+    #return  re.split(r'\W+', text)
+    # using french word tokenizer from nltk
+    return word_tokenize(text, language='french')
+
 
     
 class SegmentedCorpus:
@@ -187,7 +210,7 @@ class SegmentedCorpus:
     # see: itertools.chain(*iterables) ?
         
             
-    def create_paragraphs_list(self, tqdm_disable=False, verbose=True, into_corpus=True, into_docs=True):
+    def create_paragraphs_list(self, tqdm_disable=False, verbose=True, into_corpus=True, into_docs=True, into_segs=True):
         if verbose: 
             print('Creating list of paragraphs...')
         paragraphs = []
@@ -284,12 +307,12 @@ class SegmentedCorpus:
     def create_vocabulary_frequency(self, tqdm_disable=False, verbose=True, preserve_only=None):
         if verbose: 
             print("Calculating vocabulary frequency... ", end='')    
-        self.data['vocabulary_freq'] = FreqDist([voc for voc in self.data['vocabulary']])
+        self.data['vocabulary_freq'] = FreqDist([voc for voc in self.data['vocabulary_list']])
         if preserve_only is not None:
-            self.data['voc_freq'] = corpus.data['voc_freq'].most_common(preserve_only)
-            self.data['vocabulary'] = self.data['voc_freq'].keys()
+            self.data['vocabulary_freq'] = corpus.data['voc_freq'].most_common(preserve_only)
+            self.data['vocabulary_set'] = self.data['voc_freq'].keys()
         if verbose: print("[DONE]")
-            
+        
     def create_vocabulary_frequency_on_segments(self, tqdm_disable=False, verbose=True, preserve_only=None):
         if verbose: print(" |-Making segment vocabulary... ", end='')
         for i, seg in enumerate(tqdm(self.data['segments'])):
