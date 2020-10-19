@@ -11,11 +11,11 @@ from nltk import FreqDist
 
 DEFAULT_BREAKMARK = u'***<-----------------SEGMENT_BREAKPOINT----------------->***'
 
-def _preprocessor_function(self, text): 
+def _preprocessor_function(text): 
     if text is None: text = ""
     return TextPreProcessor.removeNoise(text.lower())
             
-def _tokenizer_function(self, text): 
+def _tokenizer_function(text): 
     if text is None: text = ""
     return TextPreProcessor.tokenize(text.split())
 
