@@ -250,7 +250,7 @@ class SegmentedCorpus:
             print("Making full vocabulary... ", end='')
         self.data['vocabulary_list'] = []  #list of retained words, tokenized, but still in order and with repetitions
         #for each paragraph within the corpus
-        for par in enumerate(tqdm(self.data['paragraphs'], desc='paragraphs', disable=tqdm_disable)):
+        for par in tqdm(self.data['paragraphs'], desc='paragraphs', disable=tqdm_disable):
             #get clean text of paragraph
             if preprocessor_function is not None:
                 text = preprocessor_function(par['text'])
