@@ -332,7 +332,7 @@ class SegmentedCorpus:
         if into_corpus:
             self.data['vocabulary_freq'] = FreqDist([voc for voc in tqdm(self.data['vocabulary_list'], desc='Calculating vocabulary frequency on corpus', unit='words', disable=tqdm_disable)])
             if preserve_only is not None:
-                self.data['vocabulary_freq'] = corpus.data['vocabulary_freq'].most_common(preserve_only)
+                self.data['vocabulary_freq'] = self.data['vocabulary_freq'].most_common(preserve_only)
             self.data['vocabulary_set'] = self.data['vocabulary_freq'].keys()
         if into_docs:
             for i, doc in enumerate(tqdm(self.data['documents'], desc='Calculating vocabulary frequency on documents', unit='documents', disable=tqdm_disable)):
@@ -362,18 +362,18 @@ class SegmentedCorpus:
         if vocabulary_set is None: vocabulary_set = self.data['vocabulary_set']
         #bow for documents
         if verbose: print("Making BoW feature set description for segments... ", end='')
-        for i, doc in enumerate(tqdm(corpus.data['documents'], desc='Making bag-of-words representation for documents', unit='documents', disable=tqdm_disable)):
+        for i, doc in enumerate(tqdm(self.data['documents'], desc='Making bag-of-words representation for documents', unit='documents', disable=tqdm_disable)):
             doc['bow_features'] = [voc in doc['vocabulary_set'] for voc in vocabulary_set]
         if verbose: print("[DONE]")
         #bow for segments
         if verbose: print("Making BoW feature set description for segments... ", end='')
-        for i, seg in enumerate(tqdm(corpus.data['segments'], desc='Making bag-of-words representation for segments', unit='segments', disable=tqdm_disable)):
+        for i, seg in enumerate(tqdm(self.data['segments'], desc='Making bag-of-words representation for segments', unit='segments', disable=tqdm_disable)):
             seg['bow_features'] = [voc in seg['vocabulary_set'] for voc in vocabulary_set]
             seg['sample'] = (seg['bow_features'], seg['lbl_idx'])
         if verbose: print("[DONE]")
         #bow for paragraphs
         if verbose: print("Making BoW feature set description for segments... ", end='')
-        for i, par in enumerate(tqdm(corpus.data['paragraphs'], desc='Making bag-of-words representation for paragraphs', unit='paragraphs', disable=tqdm_disable)):
+        for i, par in enumerate(tqdm(self.data['paragraphs'], desc='Making bag-of-words representation for paragraphs', unit='paragraphs', disable=tqdm_disable)):
             par['bow_features'] = [voc in par['vocabulary_set'] for voc in vocabulary_set]
             par['sample'] = (par['bow_features'], par['lbl_idx'])
         if verbose: print("[DONE]")
