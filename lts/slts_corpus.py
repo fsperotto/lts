@@ -93,24 +93,29 @@ class SegmentedCorpus:
                 full_text = inputfile.read()
 
                 #replace tabs and strange line markers for a blank
-                full_text = re.sub(r'[ \t\v\f\r]+', ' ', full_text)
+                pattern = re.compile(r'[ \t\v\f\r]+', re.UNICODE)
+                full_text = pattern.sub(' ', full_text)
                 #trim lines
-                full_text = re.sub(r'\s*\n\s*', '\n', full_text)
+                pattern = re.compile(r'\s*\n\s*', re.UNICODE)
+                full_text = pattern.sub('\n', full_text)
                 #replace multi linebreaks (>=2) for paragraph_mark '\n\n'
-                full_text = re.sub(r'\n\n+', '\n\n', full_text)
+                pattern = re.compile(r'\n\n+', re.UNICODE)
+                full_text = pattern.sub('\n\n', full_text)
                 ##breakpoint mark for segment = \n\n\n
                 #full_text = re.sub(u'[\n\s]*'+breakpoint_mark+u'[\n\s]*', r'\t\t', full_text)
                 full_text = full_text.replace(breakpoint_mark, '\t\t')
-                full_text = re.sub(r'\n*\t\t\n*', '\t\t', full_text)
+                pattern = re.compile(r'\n*\t\t\n*', re.UNICODE)
+                full_text = pattern.sub('\t\t', full_text)
                 #strip blanks and empty lines at the beginning and at the end
-                full_text = full_text.strip('\s\n')
+                full_text = full_text.strip(' \n')
                 
                 if single_paragraph_mark:
-                    full_text = full_text.replace(r'\n', '\n\n')
+                    pattern = re.compile(r'\n+', re.UNICODE)
+                    full_text = pattern.sub('\n\n', full_text)
 
                 #list of starting positions (in char) for paragraphs
-                #pattern = re.compile(r'\t\t', re.UNICODE)                
-                pattern = re.compile(r'\t\t')                
+                pattern = re.compile(r'\t\t', re.UNICODE)                
+                #pattern = re.compile(u'\t\t')                
                 char_seg_breakpoints = [match.end() for match in pattern.finditer(full_text)]
                 if len(char_seg_breakpoints) != self.num_breakpoints():
                     print('warning: document ' + inputfilename + ' has different number of segments!')
@@ -121,11 +126,12 @@ class SegmentedCorpus:
                 ##recreate full_text (segment break becomes paragraph break)
                 #full_text = u'\n\n'.join(segments)
 
-                full_text = full_text.replace(r'\t\t', '\n\n')
+                #full_text = full_text.replace('\t\t', '\n\n')
+                pattern = re.compile(r'\t\t', re.UNICODE)
+                full_text = pattern.sub('\n\n', full_text)
                 
                 #list of starting positions (in char) for paragraphs
-                #pattern = re.compile(r'\n\n', re.UNICODE)                
-                pattern = re.compile(r'\n\n')                
+                pattern = re.compile(r'\n\n', re.UNICODE)                
                 char_paragraph_breakpoints = [match.end() for match in pattern.finditer(full_text)]
 
                 #list of starting positions (in paragraphs) for segments (from the second one)
@@ -156,7 +162,7 @@ class SegmentedCorpus:
             #end = doc['char_paragraph_breakpoints'][doc['paragraph_segment_breakpoints'][seg_idx]-1]      if  seg_idx < num_breaks   else  doc['len_text']
             ini = doc['char_segment_breakpoints'][seg_idx-1]    if  seg_idx >= 1           else  0
             end = doc['char_segment_breakpoints'][seg_idx]      if  seg_idx < num_breaks   else  doc['len_text']
-            return doc['text'][ini:end].strip('\n\s')
+            return doc['text'][ini:end].strip(' \n')
         else:
             return None
 
@@ -173,7 +179,7 @@ class SegmentedCorpus:
         if par_idx < num_paragraphs:
             ini = doc['char_paragraph_breakpoints'][par_idx-1]    if  par_idx >= 1                 else  0
             end = doc['char_paragraph_breakpoints'][par_idx]      if  par_idx < num_paragraphs-1   else  doc['len_text']
-            return doc['text'][ini:end].strip('\n\s')
+            return doc['text'][ini:end].strip(' \n')
         else:
             return None            
 
