@@ -28,7 +28,7 @@ __version__ = (0, 0, 2)
 #
 _names=[
             {'classname':'SegmentedCorpus',         'basemodulename':'slts_corpus',  'submodulename':''},
-            {'classname':'RegExSegmenter',          'basemodulename':'segmenter',    'submodulename':''}
+            {'classname':'RegExSegmenter',          'basemodulename':'segmenter',    'submodulename':''},
             {'classname':'EmbeddingsTextSegmenter', 'basemodulename':'emb_text_seg', 'submodulename':''},
             {'classname':'TextPreProcessor',        'basemodulename':'pre_proc',     'submodulename':''},
             {'classname':'C99',                     'basemodulename':'uts',          'submodulename':'.c99'},
