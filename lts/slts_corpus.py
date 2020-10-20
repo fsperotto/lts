@@ -86,7 +86,7 @@ class SegmentedCorpus:
         #    print(inputfilenames)
         
         #read files
-        for tqdm(inputfilename in inputfilenames, desc='Reading', unit='files', disable=tqdm_disable):
+        for inputfilename in tqdm(inputfilenames, desc='Reading', unit='files', disable=tqdm_disable):
             with open(inputfilename, "rt", encoding="UTF-8") as inputfile:
 
                 #read raw data from file
