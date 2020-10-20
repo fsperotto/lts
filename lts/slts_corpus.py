@@ -129,7 +129,8 @@ class SegmentedCorpus:
                 char_paragraph_breakpoints = [match.end() for match in pattern.finditer(full_text)]
 
                 #list of starting positions (in paragraphs) for segments (from the second one)
-                paragraph_seg_breakpoints = [char_paragraph_breakpoints.index(pos)+1 for pos in char_seg_breakpoints]
+                paragraph_seg_breakpoints = [char_paragraph_breakpoints.index(pos) for pos in char_seg_breakpoints]
+                paragraph_seg_breakpoints = [idx+1 for idx in paragraph_seg_breakpoints]
                 #paragraph_seg_breakpoints = []
                 
                 #size of document in characters
