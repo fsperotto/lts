@@ -106,10 +106,11 @@ class SegmentedCorpus:
                 full_text = full_text.strip('\s\n')
                 
                 if single_paragraph_mark:
-                    full_text = full_text.replace(u'\n', u'\n\n')
+                    full_text = full_text.replace(r'\n', '\n\n')
 
                 #list of starting positions (in char) for paragraphs
-                pattern = re.compile(u'\t\t', re.UNICODE)                
+                #pattern = re.compile(r'\t\t', re.UNICODE)                
+                pattern = re.compile(r'\t\t')                
                 char_seg_breakpoints = [match.end() for match in pattern.finditer(full_text)]
                 if len(char_seg_breakpoints) != self.num_breakpoints():
                     print('warning: document ' + inputfilename + ' has different number of segments!')
@@ -120,14 +121,15 @@ class SegmentedCorpus:
                 ##recreate full_text (segment break becomes paragraph break)
                 #full_text = u'\n\n'.join(segments)
 
-                full_text = full_text.replace(u'\t\t', u'\n\n')
+                full_text = full_text.replace(r'\t\t', '\n\n')
                 
                 #list of starting positions (in char) for paragraphs
-                pattern = re.compile(u'\n\n', re.UNICODE)                
+                #pattern = re.compile(r'\n\n', re.UNICODE)                
+                pattern = re.compile(r'\n\n')                
                 char_paragraph_breakpoints = [match.end() for match in pattern.finditer(full_text)]
 
                 #list of starting positions (in paragraphs) for segments (from the second one)
-                paragraph_seg_breakpoints = [char_paragraph_breakpoints.index(pos) for pos in char_seg_breakpoints]
+                paragraph_seg_breakpoints = [char_paragraph_breakpoints.index(pos)+1 for pos in char_seg_breakpoints]
                 #paragraph_seg_breakpoints = []
                 
                 #size of document in characters
@@ -137,7 +139,7 @@ class SegmentedCorpus:
                 
                 
                 #create document dictionary
-                doc = {'filename':filename, 'text':full_text, 'len_text':len_text, 'char_paragraph_breakpoints':char_paragraph_breakpoints, 'paragraph_segment_breakpoints':paragraph_seg_breakpoints, 'char_segment_breakpoints':char_seg_breakpoints}
+                doc = {'filename':inputfilename, 'text':full_text, 'len_text':len_text, 'char_paragraph_breakpoints':char_paragraph_breakpoints, 'paragraph_segment_breakpoints':paragraph_seg_breakpoints, 'char_segment_breakpoints':char_seg_breakpoints}
 
                 #append to the list
                 self.data['documents'].append(doc)
@@ -149,8 +151,10 @@ class SegmentedCorpus:
         num_breaks = self.num_breakpoints()
         doc = self.data['documents'][doc_idx]
         if seg_idx <= num_breaks:
-            ini = doc['char_paragraph_breakpoints'][doc['paragraph_segment_breakpoints'][seg_idx-1]-1]    if  seg_idx >= 1           else  0
-            end = doc['char_paragraph_breakpoints'][doc['paragraph_segment_breakpoints'][seg_idx]-1]      if  seg_idx < num_breaks   else  doc['len_text']
+            #ini = doc['char_paragraph_breakpoints'][doc['paragraph_segment_breakpoints'][seg_idx-1]-1]    if  seg_idx >= 1           else  0
+            #end = doc['char_paragraph_breakpoints'][doc['paragraph_segment_breakpoints'][seg_idx]-1]      if  seg_idx < num_breaks   else  doc['len_text']
+            ini = doc['char_segment_breakpoints'][seg_idx-1]    if  seg_idx >= 1           else  0
+            end = doc['char_segment_breakpoints'][seg_idx]      if  seg_idx < num_breaks   else  doc['len_text']
             return doc['text'][ini:end].strip('\n\s')
         else:
             return None
