@@ -114,36 +114,112 @@ class RegexSegmenter(Segmenter):
     # segment a document using rules
     def _segment_paragraphs(self, paragraphs):
   
-        #initialize empty list of starting positions
-        segment_breakpoints = []
-        confidence = []
+        #for each break get the corresponding regex, then try to match each regex to each paragraph
+        confidence = [ [1.0  if pattern.search(par) is not None  else  0.0  for  par in paragraphs] for pattern in self.regex_rules ]
 
-        #remember last position found
-        #char_position = 0
-        prev_paragraph_position = 0
-        
-        #for each break get the corresponding regex
-        for lbl_idx, pattern in enumerate(self.regex_rules):
-            
-            #default starting value is the next paragraph
-            next_paragraph_position = prev_paragraph_position+1
-            next_paragraph_confidence = 0.0
-            
-            #for each paragraph
-            for i in range(prev_paragraph_position+1, len(paragraphs)):
-                #search for correspondence
-                if pattern.search(paragraphs[i]) is not None:
-                    #add the position to the list
-                    next_paragraph_position = i
-                    next_paragraph_confidence = 1.0
-                    break
-                
-            segment_breakpoints.append(next_paragraph_position)
-            confidence.append(next_paragraph_confidence)
-            
-            prev_paragraph_position = next_paragraph_position
-                
-        return segment_breakpoints, confidence
+        #get the first occurrence as suggestion
+        breakpoints = [ next(par_idx for par_idx, confidence_value in enumerate(confidence[lbl_idx]) if confidence_value == 1.0 ) for lbl_idx in range(len(self.regex_rules)) ]
+
+        return breakpoints, confidence
     
   
+class SizeSegmenter(Segmenter):
+
+    #constructor
+    def __init__(self, num_segs, strategy='ratio', name=None):
+        super().__init__(num_segs, name=name)
+        #self.avg = {FAD_HEAD:0.0, FAD_FACT:0.0, FAD_REAS:0.0, FAD_CONC:0.0}
+        if name is None:
+            self.name = f"Size Segmenter ({strategy})"
+        self.avg = []
+        self.strategy = strategy
     
+    # segment a document by average size of segments
+    def learn(self, data, num_segs=4):
+
+        documents = data['documents']
+#        if hasattr(data, 'documents'):
+#            documents = data['documents']
+#        else:
+#            documents = data
+            
+        self.avg_seg_size = [0.0] * num_segs
+        self.avg_seg_ratio = [0.0] * num_segs
+        self.avg_size = 0.0
+        
+        
+        num_docs = len(documents)
+        #cumulative sum of size of each segment type in the set of documents
+        for doc in documents:
+            #num_segs = len(doc['segments'])
+            #doc_size = len(doc['text'])
+            #for seg in doc['segments']:
+            for i in range(num_segs):
+                seg = doc['segments'][i]
+                #self.avg[seg['label']] += len(seg['text']) / len(doc['text'])
+                #average character size
+                #self.avg_seg_size[i] += len(seg['text'])
+                #average paragraph size
+                self.avg_seg_size[i] += len(seg['paragraphs'])
+                self.avg_size += len(seg['paragraphs'])
+        #averaging
+        for i in range(num_segs):
+            self.avg_seg_size[i] /= num_docs 
+
+        #averaging
+        self.avg_size /= num_docs 
+            
+        #ratio
+        for i in range(num_segs):
+            self.avg_seg_ratio[i] = self.avg_seg_size[i] / self.avg_size
+        
+        #print(self.avg_size)
+        #print(self.avg_seg_size)
+        #print(self.avg_seg_ratio)
+        
+        
+    # segment a document by average size of segments
+    def _segment_paragraphs(self, paragraphs):
+        if self.strategy == 'ratio':
+            return self._segment_by_average_ratio(paragraphs)
+        elif self.strategy == 'size':
+            return self._segment_by_average_size()
+        else:
+            print('ERROR ON SIZE SEGMENTER DEFAULT STRATEGY. USING RATIO.')
+            return self._segment_by_average_size()
+        
+    
+    # segment a document by average size of segments
+    def _segment_by_average_ratio(self, paragraphs):
+    
+        #paragraphs = splitParagraphs(doc_text)
+        
+        #initialize empty list of starting positions
+        segment_breakpoints = [0] * num_segs
+
+        l = len(paragraphs)
+        p = 0
+        #lower = doc_text.lower()
+        for i in range(num_segs):
+        #for key in self.avg:
+            m = self.avg_seg_ratio[i]
+            #m = self.avg[key]
+            p += round(m*l)
+            #pos.append(p)
+            segment_breakpoints[i] = p
+    
+        #remove the last break (which is the end of the text)
+        del segment_breakpoints[-1]
+        
+        return {'segment_breakpoints':segment_breakpoints, 'confidence':[1.0]*num_segs}
+
+
+    # segment a document by average size of segments
+    def _segment_by_average_size(self):
+    
+        segment_breakpoints = [round(s) for s in self.avg_seg_size]
+        
+        #remove the last break (which is the end of the text)
+        del segment_breakpoints[-1]
+        
+        return {'segment_breakpoints':segment_breakpoints, 'confidence':[1.0]*num_segs}    
