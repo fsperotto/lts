@@ -5,10 +5,10 @@ import re       # regular expressions
 import shutil   # zip
 from deprecated import deprecated
 from collections.abc import Iterable
-from tqdm.notebook import tqdm   # progress bar
+from tqdm.auto import tqdm   # progress bar
+#from tqdm import tqdm   # progress bar
 from nltk import FreqDist
 from nltk.tokenize import word_tokenize
-#from tqdm import tqdm   # progress bar
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 
@@ -182,8 +182,8 @@ class SegmentedCorpus:
         num_paragraphs = self.num_paragraphs(doc_idx=doc_idx)
         doc = self.data['documents'][doc_idx]
         if par_idx < num_paragraphs:
-            #return next(idx for idx, break_paragraph_idx in enumerate(doc['paragraph_segment_breakpoints'] + [doc['len_text']]) if par_idx < break_paragraph_idx) 
-            return next(seg_idx for seg_idx, brk_idx in enumerate(doc['paragraph_segment_breakpoints']) if par_idx < brk_idx, self.num_labels()-1) 
+            return next(seg_idx for seg_idx, brk_idx in enumerate(doc['paragraph_segment_breakpoints'] + [doc['len_text']]) if par_idx < brk_idx) 
+            #return next(seg_idx for seg_idx, brk_idx in enumerate(doc['paragraph_segment_breakpoints']) if par_idx < brk_idx, self.num_labels()-1) 
         else:
             return None            
     
@@ -222,14 +222,10 @@ class SegmentedCorpus:
         for j, doc in enumerate(tqdm(self.data['documents'], desc='Creating list of paragraphs', unit='documents', disable=tqdm_disable)):
             #initialize document list of paragraphs
             doc_paragraphs = []
-            #initialize current segment label
-            lbl_idx = 0
             for i in range(self.num_paragraphs(j)):
                 txt = self.get_paragraph_from_text(j, i)
                 #update current segment label
-                #lbl_idx = self.get_paragraph_lbl_idx(j, i)
-                if (i < num_breaks) and (i == doc['paragraph_segment_breakpoints'][lbl_idx]):
-                    lbl_idx += 1
+                lbl_idx = self.get_paragraph_lbl_idx(j, i)
                 #create the entry relative to this paragraph
                 par = {'text':txt, 'lbl_idx':lbl_idx, 'doc_idx':j, 'paragraph_idx':i}
                 #append to the document list of paragraphs
@@ -288,9 +284,9 @@ class SegmentedCorpus:
     #        pickle.dump(data['vocabulary'], fp, protocol=pickle.HIGHEST_PROTOCOL)            
     #    print("[DONE]")
         
-    def create_vocabulary(self, preprocessor_function=_preprocessor_function, tokenizer_function=_tokenizer_function, 
-                          into_corpus=True, into_docs=True, into_segs=True,  #into_pars is mandatory
-                          tqdm_disable=False, verbose=False):
+    def create_vocabulary_list(self, preprocessor_function=_preprocessor_function, tokenizer_function=_tokenizer_function, 
+                              into_corpus=True, into_docs=True, into_segs=True,  #into_pars is mandatory
+                              tqdm_disable=False, verbose=False):
         if verbose: 
             print("Making full vocabulary... ", end='')
         vocabulary_list = []  #list of retained words, tokenized, but still in order and with repetitions
@@ -328,30 +324,66 @@ class SegmentedCorpus:
         return vocabulary_list
             
             
-    def create_vocabulary_frequency(self, tqdm_disable=False, verbose=True, preserve_only=None):
+    def create_vocabulary_set(self, preserve_only=None,
+                                into_corpus=True, into_docs=True, into_segs=True,  into_pars=True,
+                                tqdm_disable=False, verbose=False):
         if verbose: 
             print("Calculating vocabulary frequency... ", end='')    
-        self.data['vocabulary_freq'] = FreqDist([voc for voc in self.data['vocabulary_list']])
-        if preserve_only is not None:
-            self.data['vocabulary_freq'] = corpus.data['voc_freq'].most_common(preserve_only)
-            self.data['vocabulary_set'] = self.data['voc_freq'].keys()
-        if verbose: print("[DONE]")
+        if into_corpus:
+            self.data['vocabulary_freq'] = FreqDist([voc for voc in tqdm(self.data['vocabulary_list'], desc='Calculating vocabulary frequency on corpus', unit='words', disable=tqdm_disable)])
+            if preserve_only is not None:
+                self.data['vocabulary_freq'] = corpus.data['vocabulary_freq'].most_common(preserve_only)
+            self.data['vocabulary_set'] = self.data['vocabulary_freq'].keys()
+        if into_docs:
+            for i, doc in enumerate(tqdm(self.data['documents'], desc='Calculating vocabulary frequency on documents', unit='documents', disable=tqdm_disable)):
+                doc['vocabulary_freq'] = FreqDist([voc for voc in doc['vocabulary_list']])
+                if preserve_only is not None:
+                    doc['vocabulary_freq'] = doc['vocabulary_freq'].most_common(preserve_only)
+                doc['vocabulary_set'] = doc['vocabulary_freq'].keys()
+        if into_segs:
+            for i, seg in enumerate(tqdm(self.data['segments'], desc='Calculating vocabulary frequency on segments', unit='segments', disable=tqdm_disable)):
+                seg['vocabulary_freq'] = FreqDist([voc for voc in seg['vocabulary_list']])
+                if preserve_only is not None:
+                    seg['vocabulary_freq'] = seg['vocabulary_freq'].most_common(preserve_only)
+                seg['vocabulary_set'] = seg['vocabulary_freq'].keys()
+        if into_pars:
+            for i, par in enumerate(tqdm(self.data['paragraphs'], desc='Calculating vocabulary frequency on paragraphs', unit='paragraphs', disable=tqdm_disable)):
+                par['vocabulary_freq'] = FreqDist([voc for voc in par['vocabulary_list']])
+                #if preserve_only is not None:
+                #    par['vocabulary_freq'] = par['vocabulary_freq'].most_common(preserve_only)
+                par['vocabulary_set'] = par['vocabulary_freq'].keys()
+        if verbose: 
+            print("[DONE]")
         
-    def create_vocabulary_frequency_on_segments(self, tqdm_disable=False, verbose=True, preserve_only=None):
-        if verbose: print(" |-Making segment vocabulary... ", end='')
-        for i, seg in enumerate(tqdm(self.data['segments'])):
-            self.data['segments'][i]['voc_freq'] = FreqDist([voc for voc in self.data['vocabulary']])
-            text = seg['text']
-            if text is not None:
-                text = text.lower()
-            else:
-                text = ""
-            all_words = TextPreProcessor.removeNoise(text.split())
-            tokenized_words = TextPreProcessor.tokenize(all_words)
-            self.data['segments'][i]['voc_freq'] = FreqDist([voc for voc in tokenized_words])
-            self.data['segments'][i]['vocabulary'] = self.data['segments'][i]['voc_freq'].keys()
-        if verbose: print("[DONE]")      
-            
+    def create_bow(self, vocabulary_set=None,
+                   into_docs=True, into_segs=True, into_pars=True,
+                   tqdm_disable=False, verbose=False):
+        #get the full vocabulary set
+        if vocabulary_set is None: vocabulary_set = self.data['vocabulary_set']
+        #bow for documents
+        if verbose: print("Making BoW feature set description for segments... ", end='')
+        for i, doc in enumerate(tqdm(corpus.data['documents'], desc='Making bag-of-words representation for documents', unit='documents', disable=tqdm_disable)):
+            doc['bow_features'] = [voc in doc['vocabulary_set'] for voc in vocabulary_set]
+        if verbose: print("[DONE]")
+        #bow for segments
+        if verbose: print("Making BoW feature set description for segments... ", end='')
+        for i, seg in enumerate(tqdm(corpus.data['segments'], desc='Making bag-of-words representation for segments', unit='segments', disable=tqdm_disable)):
+            seg['bow_features'] = [voc in seg['vocabulary_set'] for voc in vocabulary_set]
+            seg['sample'] = (seg['bow_features'], seg['lbl_idx'])
+        if verbose: print("[DONE]")
+        #bow for paragraphs
+        if verbose: print("Making BoW feature set description for segments... ", end='')
+        for i, par in enumerate(tqdm(corpus.data['paragraphs'], desc='Making bag-of-words representation for paragraphs', unit='paragraphs', disable=tqdm_disable)):
+            par['bow_features'] = [voc in par['vocabulary_set'] for voc in vocabulary_set]
+            par['sample'] = (par['bow_features'], par['lbl_idx'])
+        if verbose: print("[DONE]")
+
+
+#print(" |-Formmating samples... ", end='')        
+#data['samples'] = [(segment['features'], segment['label']) for segment in data['segments']]
+#print("[DONE]")      
+
+
 #about space special characters
 #
 #charset = {'\\v (Vertical Tab)':'\v', 
