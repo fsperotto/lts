@@ -27,8 +27,9 @@ __version__ = (0, 0, 2)
 # "import lts" will import the following classes but also the corresponding modules (.py files)
 #
 _names=[
-            {'classname':'EmbeddingsTextSegmenter', 'basemodulename':'emb_text_seg', 'submodulename':''},
             {'classname':'SegmentedCorpus',         'basemodulename':'slts_corpus',  'submodulename':''},
+            {'classname':'RegExSegmenter',          'basemodulename':'segmenter',    'submodulename':''}
+            {'classname':'EmbeddingsTextSegmenter', 'basemodulename':'emb_text_seg', 'submodulename':''},
             {'classname':'TextPreProcessor',        'basemodulename':'pre_proc',     'submodulename':''},
             {'classname':'C99',                     'basemodulename':'uts',          'submodulename':'.c99'},
             {'classname':'TextTiling',              'basemodulename':'uts',          'submodulename':'.texttiling'}
