@@ -290,12 +290,12 @@ class SegmentedCorpus:
         
     def create_vocabulary(self, preprocessor_function=_preprocessor_function, tokenizer_function=_tokenizer_function, 
                           into_corpus=True, into_docs=True, into_segs=True,  #into_pars is mandatory
-                          tqdm_disable=False, verbose=True):
+                          tqdm_disable=False, verbose=False):
         if verbose: 
             print("Making full vocabulary... ", end='')
         vocabulary_list = []  #list of retained words, tokenized, but still in order and with repetitions
         #for each paragraph within the corpus
-        for par in tqdm(self.data['paragraphs'], desc='paragraphs', disable=tqdm_disable):
+        for par in tqdm(self.data['paragraphs'], desc='Making full vocabulary', unit='paragraphs', disable=tqdm_disable):
             #get clean text of paragraph
             if preprocessor_function is not None:
                 text = preprocessor_function(par['text'])
