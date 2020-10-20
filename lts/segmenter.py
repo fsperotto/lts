@@ -118,7 +118,7 @@ class RegexSegmenter(Segmenter):
         confidence = [ [1.0  if pattern.search(par) is not None  else  0.0  for  par in paragraphs] for pattern in self.regex_rules ]
 
         #get the first occurrence as suggestion
-        breakpoints = [ next(par_idx for par_idx, confidence_value in enumerate(confidence[lbl_idx]) if confidence_value == 1.0 ) for lbl_idx in range(len(self.regex_rules)) ]
+        breakpoints = [ next( (par_idx for par_idx, confidence_value in enumerate(confidence[lbl_idx]) if confidence_value == 1.0 ), None) for lbl_idx in range(len(self.regex_rules)) ]
 
         return breakpoints, confidence
     
