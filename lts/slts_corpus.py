@@ -82,8 +82,8 @@ class SegmentedCorpus:
             if not recursive_search:
                 break
 
-        #if verbose:
-        #    print(inputfilenames)
+        if verbose:
+            print('Files to read: ', inputfilenames)
         
         #read files
         for inputfilename in tqdm(inputfilenames, desc='Reading', unit='files', disable=tqdm_disable):
@@ -93,17 +93,17 @@ class SegmentedCorpus:
                 full_text = inputfile.read()
 
                 #replace tabs and strange line markers for a blank
-                full_text = re.sub(u'[ \t\v\f\r]+', ' ', full_text)
+                full_text = re.sub(r'[ \t\v\f\r]+', ' ', full_text)
                 #trim lines
-                full_text = re.sub(u'\s*\n\s*', u'\n', full_text)
+                full_text = re.sub(r'\s*\n\s*', '\n', full_text)
                 #replace multi linebreaks (>=2) for paragraph_mark '\n\n'
-                full_text = re.sub(u'\n\n+', u'\n\n', full_text)
+                full_text = re.sub(r'\n\n+', '\n\n', full_text)
                 ##breakpoint mark for segment = \n\n\n
                 #full_text = re.sub(u'[\n\s]*'+breakpoint_mark+u'[\n\s]*', r'\t\t', full_text)
-                full_text = full_text.replace(breakpoint_mark, u'\t\t')
-                full_text = re.sub(u'\n*\t\t\n*', u'\t\t', full_text)
+                full_text = full_text.replace(breakpoint_mark, '\t\t')
+                full_text = re.sub(r'\n*\t\t\n*', '\t\t', full_text)
                 #strip blanks and empty lines at the beginning and at the end
-                full_text = full_text.strip(u'\s\n')
+                full_text = full_text.strip('\s\n')
                 
                 if single_paragraph_mark:
                     full_text = full_text.replace(u'\n', u'\n\n')
