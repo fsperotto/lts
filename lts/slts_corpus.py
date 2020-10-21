@@ -14,12 +14,14 @@ from nltk.stem import SnowballStemmer
 
 DEFAULT_BREAKMARK = u'***<-----------------SEGMENT_BREAKPOINT----------------->***'
 
-def _preprocessor_function(text): 
+DEFAULT_LANG = 'french'
+
+def _preprocessor_function(text, lang=DEFAULT_LANG): 
     if text is None: text = ""
     REPLACE_BY_SPACE_RE = re.compile('[/(){}\[\]\|@,;]')
     BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
     ONLY_WORDS_RE = re.compile(r"\w+")
-    STOPWORDS = set(stopwords.words('french'))
+    STOPWORDS = set(stopwords.words(lang))
     # lowercase text
     text = text.lower()
     # replace REPLACE_BY_SPACE_RE symbols by space in text. substitute the matched string in REPLACE_BY_SPACE_RE with space.
@@ -32,14 +34,14 @@ def _preprocessor_function(text):
     text = ' '.join(word for word in text.split() if word not in STOPWORDS) # remove stopwors from text
     return text            
         
-def _tokenizer_function(text): 
+def _tokenizer_function(text, lang=DEFAULT_LANG): 
     if text is None: text = ""
     ## using spaces    
     #return  text.split()
     ## using regex   
     #return  re.split(r'\W+', text)
     # using french word tokenizer from nltk
-    return word_tokenize(text, language='french')
+    return word_tokenize(text, language=lang)
 
 
     
@@ -85,6 +87,10 @@ class SegmentedCorpus:
         if verbose:
             print('Files to read: ', inputfilenames)
         
+        #SENTENCE_BREAK =  '\n'   # '\t'
+        #PARAGRAPH_BREAK = '\n\n' # '\n'
+        #SEGMENT_BREAK =   '\t\t' # '\f'
+        
         #read files
         for inputfilename in tqdm(inputfilenames, desc='Reading', unit='files', disable=tqdm_disable):
             with open(inputfilename, "rt", encoding="UTF-8") as inputfile:
@@ -99,24 +105,21 @@ class SegmentedCorpus:
                 pattern = re.compile(r'\s*\n\s*', re.UNICODE)
                 full_text = pattern.sub('\n', full_text)
                 #replace multi linebreaks (>=2) for paragraph_mark '\n\n'
-                pattern = re.compile(r'\n\n+', re.UNICODE)
-                full_text = pattern.sub('\n\n', full_text)
-                ##breakpoint mark for segment = \n\n\n
-                #full_text = re.sub(u'[\n\s]*'+breakpoint_mark+u'[\n\s]*', r'\t\t', full_text)
-                full_text = full_text.replace(breakpoint_mark, '\t\t')
-                pattern = re.compile(r'\n*\t\t\n*', re.UNICODE)
-                full_text = pattern.sub('\t\t', full_text)
-                #strip blanks and empty lines at the beginning and at the end
-                full_text = full_text.strip(' \n')
-                
                 if single_paragraph_mark:
                     pattern = re.compile(r'\n+', re.UNICODE)
-                    full_text = pattern.sub('\n\n', full_text)
-
+                else:
+                    pattern = re.compile(r'\n\n+', re.UNICODE)
+                full_text = pattern.sub('\n\n', full_text)
+                ##breakpoint mark for segment = \f\f
+                full_text = full_text.replace(breakpoint_mark, '\f\f')
+                pattern = re.compile(r'\n*\f\f\n*', re.UNICODE)
+                full_text = pattern.sub('\f\f', full_text)
+                #strip blanks and empty lines at the beginning and at the end
+                full_text = full_text.strip(' \n')
                 #list of starting positions (in char) for paragraphs
-                pattern = re.compile(r'\t\t', re.UNICODE)                
-                #pattern = re.compile(u'\t\t')                
+                pattern = re.compile(r'\f\f', re.UNICODE)                
                 char_seg_breakpoints = [match.end() for match in pattern.finditer(full_text)]
+                #verify coherence
                 if len(char_seg_breakpoints) != self.num_breakpoints():
                     print('warning: document ' + inputfilename + ' has different number of segments!')
                 
@@ -126,6 +129,7 @@ class SegmentedCorpus:
                 ##recreate full_text (segment break becomes paragraph break)
                 #full_text = u'\n\n'.join(segments)
 
+                #change segment breakpoint for paragraph breakpoint
                 #full_text = full_text.replace('\t\t', '\n\n')
                 pattern = re.compile(r'\t\t', re.UNICODE)
                 full_text = pattern.sub('\n\n', full_text)
