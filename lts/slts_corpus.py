@@ -87,9 +87,9 @@ class SegmentedCorpus:
         if verbose:
             print('Files to read: ', inputfilenames)
         
-        #SENTENCE_BREAK =  '\n'   # '\t'
-        #PARAGRAPH_BREAK = '\n\n' # '\n'
-        #SEGMENT_BREAK =   '\t\t' # '\f'
+        SENTENCE_BREAK =  '\n'   # '\t'
+        PARAGRAPH_BREAK = '\n\n' # '\n'
+        SEGMENT_BREAK =   '\t\t' # '\f'
         
         #read files
         for inputfilename in tqdm(inputfilenames, desc='Reading', unit='files', disable=tqdm_disable):
@@ -131,7 +131,7 @@ class SegmentedCorpus:
 
                 #change segment breakpoint for paragraph breakpoint
                 #full_text = full_text.replace('\t\t', '\n\n')
-                pattern = re.compile(r'\t\t', re.UNICODE)
+                pattern = re.compile(r'\f\f', re.UNICODE)
                 full_text = pattern.sub('\n\n', full_text)
                 
                 #list of starting positions (in char) for paragraphs
