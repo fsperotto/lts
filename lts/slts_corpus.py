@@ -102,7 +102,7 @@ class SegmentedCorpus:
                 pattern = re.compile(r'[ \t\v\f\r]+', re.UNICODE)
                 full_text = pattern.sub(' ', full_text)
                 #trim lines
-                pattern = re.compile(r'\s*\n\s*', re.UNICODE)
+                pattern = re.compile(r' *\n *', re.UNICODE)
                 full_text = pattern.sub('\n', full_text)
                 #replace multi linebreaks (>=2) for paragraph_mark '\n\n'
                 if single_paragraph_mark:
